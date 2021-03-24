@@ -16,6 +16,7 @@ from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelStates
 from formal_control.msg import SelfStateMsg
 
+
 class Robot():
     def __init__(self, twist_pub = "/h1/husky_velocity_controller/cmd_vel", scan_topic = " ", odom_topic = " ", imu_topic = " ", model_name = "Husky_h1", entity_name = "base_link"):
         self.twist_pub = twist_pub
@@ -46,12 +47,10 @@ class Robot():
 
         self.main()
 
-# Callback Funcs
+#   Callbacks
     def imuCallback(self, data):
 	    [roll, pitch, self.yaw] = euler_from_quaternion([data.orientation.x, data.orientation.y, data.orientation.z, data.orientation.w]) #Convert quaternion to euler angles
 	    self.yaw = self.fix_yaw(self.yaw)
-
-
 
     def Odomcallback(self, data):
         x = data.pose.pose.position.x
@@ -59,9 +58,7 @@ class Robot():
         self.x = x
         self.y = y
 
-##################
-
-# Robot Actions
+#   Robot Actions
     def reset_twist(self):
         self.twist.linear.x  = 0
         self.twist.linear.y  = 0
@@ -106,9 +103,7 @@ class Robot():
             rate.sleep()
         #print("Distance to target: " + str(self.dist))
 
-##################
-
-# Robot Behaviours
+#   Robot Behaviour Definitions
     def free_ride(self):
         self.go_forward(self.v_refx)
 
@@ -128,19 +123,16 @@ class Robot():
         self.v_refx = self.v_refx+inc
         self.go_forward(self.v_refx)
 
-##################
-
-# Main Func
+#   Main
     def main(self):
         #rospy.Subscriber(self.odom_topic, Odometry, self.Odomcallback)
         #rospy.Subscriber(self.imu_topic, Imu, self.imuCallback)
-        x = 2
+        main_start = 1
 
-##################
 
 class ActionExecutor():
     def __init__(self,policy = [0] ):
-        rospy.init_node('Calculator_Mahmut')
+        rospy.init_node('ActionExecutor')
         rospy.Subscriber("/h1/scan", LaserScan, self.LidarCallback)
         rospy.Subscriber("/gazebo/model_states", ModelStates, self.StateCallback)
         rospy.Subscriber("/traffic_robot_state", SelfStateMsg, self.TimestepCallback)
@@ -170,7 +162,7 @@ class ActionExecutor():
 
         self.main()
 
-# Callback Funcs
+#   Callbacks and fixes
     def LidarCallback(self,data):
         self.latest_scan = data.ranges
 
@@ -180,7 +172,6 @@ class ActionExecutor():
     def TimestepCallback(self,data):
         self.timestep = data.timestep
 
-##################
     def fix_yaw(self, yaw):
         while not (yaw < math.pi and yaw >= -math.pi):
             if yaw >= math.pi:
@@ -190,7 +181,8 @@ class ActionExecutor():
             else:
                 break
         return yaw
-# Gets
+
+#   Get parameters and policy
     def get_params(self,robot_1,robot_2):
         robot_1.x = self.latest_state_data.pose[self.latest_state_data.name.index(robot_1.model_name)].position.x
         robot_2.x = self.latest_state_data.pose[self.latest_state_data.name.index(robot_2.model_name)].position.x
@@ -218,9 +210,7 @@ class ActionExecutor():
         self.msg.policy = self.policy
         self.policy_pub.publish(self.msg)
 
-##################
-
-# Checks
+#   Check variables - environmental variables are controlled
     def check_distance(self,robot_1,robot_2):
         if robot_1.x >= robot_2.x:
             self.FV = robot_1
@@ -235,20 +225,9 @@ class ActionExecutor():
         self.msg.rfdist = robot_1.rfdist
         self.msg.bdist = robot_1.bdist
 
-        #print("Forward Vehicle: " + self.FV.model_name)
-        #print("Backward Vehicle: " + self.BV.model_name)
         print("Front distance: "+ str(robot_1.rfdist))
         print("Back distance : "+ str(robot_1.bdist))
         print("\n")
-        #print("Husky 1 X = " + str(robot_1.x))
-        #print("Husky 1 Y = " + str(robot_1.y))
-        """
-        print("F_dist = " + str(self.BV.rfdist))
-        print("B_dist = " + str(self.FV.bdist))
-
-        print("x1 = " + str(robot_1.x))
-        print("x2 = " + str(robot_2.x))
-        """
 
     def check_velocity(self,robot_1,robot_2):
         self.v =robot_1.vx-robot_2.vx
@@ -303,7 +282,7 @@ class ActionExecutor():
             elif(robot_1.rfdist < robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist > robot_1.bdist_th):
                 self.step = 11
 
-##################
+# Main
     def main(self):
         rate = rospy.Rate(1)
         self.got_new_plan = False
@@ -328,7 +307,7 @@ class ActionExecutor():
             self.check_state(husky_1, self.timestep)
 
             #print("Timestepim: " + str(self.timestep))
-            print("Step: " + str(self.step))
+            print("Policy Step: " + str(self.step))
             print("\n")
 
             if self.step in self.policy:
@@ -341,7 +320,6 @@ class ActionExecutor():
                         if (1 < husky_1.bdist < 4) or (math.floor(husky_1.rfdist_th) < husky_1.rfdist < husky_1.rfdist_th) or left_check:
                             self.get_policy(husky_1)
                             rate.sleep()
-                            #husky_1.bdist_th
 
                 else:
                     self.get_policy(husky_1)

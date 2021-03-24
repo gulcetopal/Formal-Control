@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+import rosparam
 from formal_control.msg import SelfStateMsg, PathMsg
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -20,10 +21,12 @@ class Point():
 
 class PathGenerator():
     def __init__(self):
-        rospy.init_node("Pathfinder_Mahmut")
+        rospy.init_node("PathGenerator")
         self.latest_state_data = ModelStates()
         self.traj = []
         self.policy = []
+
+        self.path_dir = rospy.get_param('Directory/path')
         #self.policy = [0,0,0,0]
         #self.policy = [0,0,0,0,1,1,1,2,3,3,3,3,3,3,3,3,3,3,3,3]
         #self.policy = [3,3,3,8,11,11,11,6,0,0,0]
@@ -49,31 +52,21 @@ class PathGenerator():
         self.got_new_plan = False
         self.policy_check = False
 
-        rospy.Subscriber("/est_path_data", PathMsg, self.EstCallback)
-        rospy.Subscriber("/est_path_data2", PathMsg, self.EstCallback2)
         rospy.Subscriber("/traffic_topic", SelfStateMsg, self.policyCallback)
         rospy.Subscriber("/gazebo/model_states", ModelStates, self.StateCallback)
         self.path_pub = rospy.Publisher("/path_data", PathMsg, queue_size = 50)
-        #self.fake_policy_pub
 
         self.main()
-
-    def EstCallback(self,data):
-        self.est_path_data = data
-
-    def EstCallback2(self,data):
-        self.est_path2_data = data
 
     def StateCallback(self,data):
         self.latest_state_data = data
 
     def policyCallback(self,data):
         self.policy = data.policy
-
         self.v_relative = data.v_relative
         self.got_new_plan = data.got_new_plan
 
-    def traj_computer(self):
+    def trajectoryPlanner(self):
         right_array = [0, 1, 2, 3, 4, 5]
         mid_array = [6, 7, 8]
         left_array = [9, 10, 11]
@@ -224,7 +217,7 @@ class PathGenerator():
 
         msg = PathMsg()
         old_trajx = []
-        a = 1
+        counter = 1
         while not rospy.is_shutdown():
             self.get_params()
             #if self.got_new_plan:
@@ -242,7 +235,7 @@ class PathGenerator():
                     self.w = []
                     print("Policy updated")
                     self.get_params()
-                    self.traj_computer()
+                    self.trajectoryPlanner()
                     old_trajx = self.trajx
                     msg.m = self.trajm_lines
                     msg.y_start = self.path_y
@@ -258,16 +251,16 @@ class PathGenerator():
 
                         self.w.append(yaw)
                     self.w.append(self.w[len(self.w)-1])
-                    with open('/home/gulce/final_ws/src/path/path.csv',"w") as path:
+                    with open(self.path_dir,"w") as path:
                         path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                         for i in range(len(msg.x_start)):
                             path_writer.writerow([msg.x_start[i],msg.y_start[i],self.w[i]])
 
 
-                if a < 2:
+                if counter < 2:
                     self.w = []
                     self.get_params()
-                    self.traj_computer()
+                    self.trajectoryPlanner()
 
                     msg.m = self.trajm_lines
                     msg.y_start = self.path_y
@@ -282,7 +275,7 @@ class PathGenerator():
                             yaw = math.atan((self.path_y[i]-self.path_y[i+1])/(self.path_x[i]-self.path_x[i+1]))
                         self.w.append(yaw)
                     self.w.append(self.w[len(self.w)-1])
-                    with open('/home/gulce/final_ws/src/path/path.csv',"w") as path:
+                    with open(self.path_dir,"w") as path:
                         path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                         for i in range(len(msg.x_start)):
                             path_writer.writerow([msg.x_start[i],msg.y_start[i],self.w[i]])
@@ -308,7 +301,7 @@ class PathGenerator():
                     #rate.sleep()
                 #else:
                 #    a = 2
-                a = a + 1
+                counter = counter + 1
 
 if __name__ == '__main__':
     PathGenerator()

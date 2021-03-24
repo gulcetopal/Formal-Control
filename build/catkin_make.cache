@@ -1,2 +1,2 @@
-formal_control:multi_robots/multihusky_gazebo:multi_robots/multihusky_viz:multi_robots/robot_localization_243:pure_pursuit_ros/decision:pure_pursuit_ros/simulation:vehicle_control
+formal_control:multi_robots/multihusky_gazebo:multi_robots/multihusky_viz:multi_robots/robot_localization_243
 -DCATKIN_DEVEL_PREFIX=/home/gulce/final_ws/devel -DCMAKE_INSTALL_PREFIX=/home/gulce/final_ws/install -G Unix Makefiles

@@ -8,7 +8,7 @@ import struct
 import std_msgs.msg
 
 class PathMsg(genpy.Message):
-  _md5sum = "1caaeb7e9ecb274d886a3ed99e99eb11"
+  _md5sum = "aea262bd14c4beff32fb4111e598fc59"
   _type = "formal_control/PathMsg"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """std_msgs/Header header
@@ -18,7 +18,7 @@ float32[] y_start
 float32[] y_finish
 float32[] x_start
 float32[] x_finish
-
+bool check
 
 ================================================================================
 MSG: std_msgs/Header
@@ -38,8 +38,8 @@ time stamp
 # 1: global frame
 string frame_id
 """
-  __slots__ = ['header','m','y_start','y_finish','x_start','x_finish']
-  _slot_types = ['std_msgs/Header','float32[]','float32[]','float32[]','float32[]','float32[]']
+  __slots__ = ['header','m','y_start','y_finish','x_start','x_finish','check']
+  _slot_types = ['std_msgs/Header','float32[]','float32[]','float32[]','float32[]','float32[]','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -49,7 +49,7 @@ string frame_id
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,m,y_start,y_finish,x_start,x_finish
+       header,m,y_start,y_finish,x_start,x_finish,check
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -70,6 +70,8 @@ string frame_id
         self.x_start = []
       if self.x_finish is None:
         self.x_finish = []
+      if self.check is None:
+        self.check = False
     else:
       self.header = std_msgs.msg.Header()
       self.m = []
@@ -77,6 +79,7 @@ string frame_id
       self.y_finish = []
       self.x_start = []
       self.x_finish = []
+      self.check = False
 
   def _get_types(self):
     """
@@ -118,6 +121,7 @@ string frame_id
       buff.write(_struct_I.pack(length))
       pattern = '<%sf'%length
       buff.write(struct.pack(pattern, *self.x_finish))
+      buff.write(_get_struct_B().pack(self.check))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -178,6 +182,10 @@ string frame_id
       start = end
       end += struct.calcsize(pattern)
       self.x_finish = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 1
+      (self.check,) = _get_struct_B().unpack(str[start:end])
+      self.check = bool(self.check)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -218,6 +226,7 @@ string frame_id
       buff.write(_struct_I.pack(length))
       pattern = '<%sf'%length
       buff.write(self.x_finish.tostring())
+      buff.write(_get_struct_B().pack(self.check))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -279,6 +288,10 @@ string frame_id
       start = end
       end += struct.calcsize(pattern)
       self.x_finish = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      start = end
+      end += 1
+      (self.check,) = _get_struct_B().unpack(str[start:end])
+      self.check = bool(self.check)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -293,3 +306,9 @@ def _get_struct_3I():
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
+_struct_B = None
+def _get_struct_B():
+    global _struct_B
+    if _struct_B is None:
+        _struct_B = struct.Struct("<B")
+    return _struct_B

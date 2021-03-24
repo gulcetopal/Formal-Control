@@ -1,0 +1,3 @@
+Prism:
+  model: "mdp_v2.nm"
+  spec: "spec.pctl"

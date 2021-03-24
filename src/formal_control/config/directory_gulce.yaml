@@ -1,0 +1,4 @@
+Directory:
+  path: '/home/gulce/final_ws/src/path/path.csv'
+  policy: '/home/gulce/prism-games/prism-games/prism/policy_result.txt'
+  prism: "/home/gulce/prism-games/prism-games/prism"

@@ -25,6 +25,7 @@ class PathMsg {
       this.y_finish = null;
       this.x_start = null;
       this.x_finish = null;
+      this.check = null;
     }
     else {
       if (initObj.hasOwnProperty('header')) {
@@ -63,6 +64,12 @@ class PathMsg {
       else {
         this.x_finish = [];
       }
+      if (initObj.hasOwnProperty('check')) {
+        this.check = initObj.check
+      }
+      else {
+        this.check = false;
+      }
     }
   }
 
@@ -80,6 +87,8 @@ class PathMsg {
     bufferOffset = _arraySerializer.float32(obj.x_start, buffer, bufferOffset, null);
     // Serialize message field [x_finish]
     bufferOffset = _arraySerializer.float32(obj.x_finish, buffer, bufferOffset, null);
+    // Serialize message field [check]
+    bufferOffset = _serializer.bool(obj.check, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -99,6 +108,8 @@ class PathMsg {
     data.x_start = _arrayDeserializer.float32(buffer, bufferOffset, null)
     // Deserialize message field [x_finish]
     data.x_finish = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [check]
+    data.check = _deserializer.bool(buffer, bufferOffset);
     return data;
   }
 
@@ -110,7 +121,7 @@ class PathMsg {
     length += 4 * object.y_finish.length;
     length += 4 * object.x_start.length;
     length += 4 * object.x_finish.length;
-    return length + 20;
+    return length + 21;
   }
 
   static datatype() {
@@ -120,7 +131,7 @@ class PathMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '1caaeb7e9ecb274d886a3ed99e99eb11';
+    return 'aea262bd14c4beff32fb4111e598fc59';
   }
 
   static messageDefinition() {
@@ -133,7 +144,7 @@ class PathMsg {
     float32[] y_finish
     float32[] x_start
     float32[] x_finish
-    
+    bool check
     
     ================================================================================
     MSG: std_msgs/Header
@@ -202,6 +213,13 @@ class PathMsg {
     }
     else {
       resolved.x_finish = []
+    }
+
+    if (msg.check !== undefined) {
+      resolved.check = msg.check;
+    }
+    else {
+      resolved.check = false
     }
 
     return resolved;

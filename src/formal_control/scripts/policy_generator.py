@@ -5,9 +5,8 @@ import os
 import sys
 
 class PolicyGenerator():
-    def __init__(self, export_dir = '/home/gulce/prism-games/prism-games/prism/policy_result.txt',policy = [] ):
-        #rospy.init_node('policy_generator')
-        self.export_dir = export_dir
+    def __init__(self, policy = []):
+        self.export_dir = rospy.get_param('Directory/policy')
         self.policy = policy
         self.main()
 

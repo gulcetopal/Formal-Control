@@ -11,4 +11,6 @@
           X_START
           X_FINISH-VAL
           X_FINISH
+          CHECK-VAL
+          CHECK
 ))

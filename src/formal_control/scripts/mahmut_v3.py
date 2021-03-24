@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+import rosparam
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Point
 import math
@@ -164,9 +165,9 @@ class pure_pursuit:
         k = 2 * math.sin(alpha)/L
         angle_i = math.atan(k*0.4)
         self.angularz = k*self.velocity
-        print("\n")
-        print("Alpha: " + str(math.degrees(alpha)))
-        print("Angular Velocity: " + str(math.degrees(self.angularz)))
+        #print("\n")
+        #print("Alpha: " + str(math.degrees(alpha)))
+        #print("Angular Velocity: " + str(math.degrees(self.angularz)))
 
         angle = angle_i*2
         #angle = np.clip(angle, -0.4189, 0.4189) # 0.4189 radians = 24 degrees because car can only turn 24 degrees max
@@ -249,7 +250,7 @@ class pure_pursuit:
 
 
 if __name__ == '__main__':
-    rospy.init_node('pure_pursuit')
+    rospy.init_node('VehicleControl')
     PP = pure_pursuit()
     rate = rospy.Rate(5)
 

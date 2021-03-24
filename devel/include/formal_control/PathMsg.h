@@ -30,7 +30,8 @@ struct PathMsg_
     , y_start()
     , y_finish()
     , x_start()
-    , x_finish()  {
+    , x_finish()
+    , check(false)  {
     }
   PathMsg_(const ContainerAllocator& _alloc)
     : header(_alloc)
@@ -38,7 +39,8 @@ struct PathMsg_
     , y_start(_alloc)
     , y_finish(_alloc)
     , x_start(_alloc)
-    , x_finish(_alloc)  {
+    , x_finish(_alloc)
+    , check(false)  {
   (void)_alloc;
     }
 
@@ -61,6 +63,9 @@ struct PathMsg_
 
    typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _x_finish_type;
   _x_finish_type x_finish;
+
+   typedef uint8_t _check_type;
+  _check_type check;
 
 
 
@@ -140,12 +145,12 @@ struct MD5Sum< ::formal_control::PathMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "1caaeb7e9ecb274d886a3ed99e99eb11";
+    return "aea262bd14c4beff32fb4111e598fc59";
   }
 
   static const char* value(const ::formal_control::PathMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x1caaeb7e9ecb274dULL;
-  static const uint64_t static_value2 = 0x886a3ed99e99eb11ULL;
+  static const uint64_t static_value1 = 0xaea262bd14c4beffULL;
+  static const uint64_t static_value2 = 0x32fb4111e598fc59ULL;
 };
 
 template<class ContainerAllocator>
@@ -171,7 +176,7 @@ float32[] y_start\n\
 float32[] y_finish\n\
 float32[] x_start\n\
 float32[] x_finish\n\
-\n\
+bool check\n\
 \n\
 ================================================================================\n\
 MSG: std_msgs/Header\n\
@@ -214,6 +219,7 @@ namespace serialization
       stream.next(m.y_finish);
       stream.next(m.x_start);
       stream.next(m.x_finish);
+      stream.next(m.check);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -265,6 +271,8 @@ struct Printer< ::formal_control::PathMsg_<ContainerAllocator> >
       s << indent << "  x_finish[" << i << "]: ";
       Printer<float>::stream(s, indent + "  ", v.x_finish[i]);
     }
+    s << indent << "check: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.check);
   }
 };
 

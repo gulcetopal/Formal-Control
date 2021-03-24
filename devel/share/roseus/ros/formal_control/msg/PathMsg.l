@@ -16,7 +16,7 @@
 
 (defclass formal_control::PathMsg
   :super ros::object
-  :slots (_header _m _y_start _y_finish _x_start _x_finish ))
+  :slots (_header _m _y_start _y_finish _x_start _x_finish _check ))
 
 (defmethod formal_control::PathMsg
   (:init
@@ -27,6 +27,7 @@
     ((:y_finish __y_finish) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:x_start __x_start) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:x_finish __x_finish) (make-array 0 :initial-element 0.0 :element-type :float))
+    ((:check __check) nil)
     )
    (send-super :init)
    (setq _header __header)
@@ -35,6 +36,7 @@
    (setq _y_finish __y_finish)
    (setq _x_start __x_start)
    (setq _x_finish __x_finish)
+   (setq _check __check)
    self)
   (:header
    (&rest __header)
@@ -58,6 +60,9 @@
   (:x_finish
    (&optional __x_finish)
    (if __x_finish (setq _x_finish __x_finish)) _x_finish)
+  (:check
+   (&optional __check)
+   (if __check (setq _check __check)) _check)
   (:serialization-length
    ()
    (+
@@ -73,6 +78,8 @@
     (* 4    (length _x_start)) 4
     ;; float32[] _x_finish
     (* 4    (length _x_finish)) 4
+    ;; bool _check
+    1
     ))
   (:serialize
    (&optional strm)
@@ -105,6 +112,8 @@
      (dotimes (i (length _x_finish))
        (sys::poke (elt _x_finish i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
        )
+     ;; bool _check
+       (if _check (write-byte -1 s) (write-byte 0 s))
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -146,11 +155,13 @@
      (dotimes (i n)
      (setf (elt _x_finish i) (sys::peek buf ptr- :float)) (incf ptr- 4)
      ))
+   ;; bool _check
+     (setq _check (not (= 0 (sys::peek buf ptr- :char)))) (incf ptr- 1)
    ;;
    self)
   )
 
-(setf (get formal_control::PathMsg :md5sum-) "1caaeb7e9ecb274d886a3ed99e99eb11")
+(setf (get formal_control::PathMsg :md5sum-) "aea262bd14c4beff32fb4111e598fc59")
 (setf (get formal_control::PathMsg :datatype-) "formal_control/PathMsg")
 (setf (get formal_control::PathMsg :definition-)
       "std_msgs/Header header
@@ -160,7 +171,7 @@ float32[] y_start
 float32[] y_finish
 float32[] x_start
 float32[] x_finish
-
+bool check
 
 ================================================================================
 MSG: std_msgs/Header
@@ -184,6 +195,6 @@ string frame_id
 
 
 
-(provide :formal_control/PathMsg "1caaeb7e9ecb274d886a3ed99e99eb11")
+(provide :formal_control/PathMsg "aea262bd14c4beff32fb4111e598fc59")
 
 
