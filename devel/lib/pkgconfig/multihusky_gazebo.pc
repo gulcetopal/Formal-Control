@@ -1,0 +1,8 @@
+prefix=/home/gulce/final_ws/devel
+
+Name: multihusky_gazebo
+Description: Description of multihusky_gazebo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

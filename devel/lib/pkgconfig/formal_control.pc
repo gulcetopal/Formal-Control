@@ -1,0 +1,8 @@
+prefix=/home/gulce/final_ws/devel
+
+Name: formal_control
+Description: Description of formal_control
+Version: 0.0.0
+Cflags: -I/home/gulce/final_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: 

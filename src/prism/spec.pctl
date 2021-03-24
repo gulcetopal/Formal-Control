@@ -1,0 +1,20 @@
+//multi(Pmax = ? E [ F "On_Right_Lane_and_FV_Far" ],Rmax = ? E [ F "On_Right_Lane_and_FV_Far" ]);
+
+//Pmax = ? [ F "On_Right_Lane_and_FV_Far" ];
+
+//multi(R{"times"}min=? [ C ],R{"rews"} >= 100 [ C ]);
+
+P>=0.95 [ R(path){"rews"}max=? [F "On_Right_Lane_and_FV_Far"] ]
+
+//multi(Pmax = ? [ F "On_Right_Lane_and_FV_Far" ],R{"times"} < 15.0 [ C ]);
+
+//Pmax = ? [ F "On_Right_Lane_and_FV_Far" ]
+//R{"times"} < 15.0 [ C ]
+
+//R{"rews"}max=? [F "On_Right_Lane_and_FV_Far"]
+
+//Pmax = ? [ F ("On_Right_Lane_and_FV_Far" | "On_Right_Lane_and_FV_Far")];
+
+//Rmax = ? [ C ];
+
+//E [ F "On_Right_Lane_and_FV_Far" ]

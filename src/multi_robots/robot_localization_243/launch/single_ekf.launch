@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  
+
+  <node pkg="robot_localization_243" type="fake_imu.py" name="fake_imu" output="screen"/>
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+    <rosparam command="load" file="$(find robot_localization_243)/params/ekf_template.yaml" />
+
+   
+    <remap from="odometry/filtered" to="/odometry/filtered_map"/>
+    <!--  Placeholder for output topic remapping
+    <remap from="accel/filtered" to=""/>
+    -->
+
+  </node>
+</launch>
