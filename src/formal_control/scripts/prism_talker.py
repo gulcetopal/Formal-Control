@@ -8,20 +8,22 @@ from formal_control.msg import SelfStateMsg
 
 
 class PrismTalker():
-    def __init__(self, rfdist = 0, lfdist = 0, bdist = 0, v = 0, init_state = 0):
+    def __init__(self, rfdist = 0, lfdist = 0, bdist = 0, v = 0, init_state = 0, lane = 1):
         self.dir = rospy.get_param('Directory/prism')
         self.model = rospy.get_param('Prism/model')
         self.spec = rospy.get_param('Prism/spec')
         self.export_dir = rospy.get_param('Directory/policy')
         self.init_state = init_state
+        self.lane = lane
         self.rfdist = rfdist
         self.lfdist = lfdist
         self.bdist = bdist
         self.v = v
         self.main()
 
-    def SetParams(self, init_state, rfdist, lfdist, bdist, v):
+    def SetParams(self, init_state, lane, rfdist, lfdist, bdist, v):
         self.init_state = init_state
+        self.lane = lane
         self.rfdist = rfdist
         self.lfdist = lfdist
         self.bdist = bdist
@@ -35,13 +37,15 @@ class PrismTalker():
         bbdist = self.bdist
         v = self.v
         ii = self.init_state
-        cmd = "rrfdist="+ str(rfdist) +",llfdist="+ str(lfdist) +",bbdist="+str(bbdist)+",vv="+str(v)+ ",init_s="+ str(ii)
+        i_lane = self.lane
+        cmd = "rrfdist="+ str(rfdist) +",llfdist="+ str(lfdist) +",bbdist="+str(bbdist)+",vv="+str(v)+ ",init_s="+ str(ii) + ",init_i="+ str(i_lane)
+
         os.system("cd " + self.dir)
         os.chdir(self.dir)
         os.system("bin/prism " + self.model +" "+ self.spec + " -const "+ cmd + " -simpath 20"+" "+self.export_dir)
         print("\n")
         rospy.loginfo("Behavioural plan calculated!")
-        print("\n")
+        print("\n") 
 
     def main(self):
         rate = rospy.Rate(10)

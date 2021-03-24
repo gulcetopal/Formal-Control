@@ -16,7 +16,6 @@ from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelStates
 from formal_control.msg import SelfStateMsg
 
-
 class Robot():
     def __init__(self, twist_pub = "/h1/husky_velocity_controller/cmd_vel", scan_topic = " ", odom_topic = " ", imu_topic = " ", model_name = "Husky_h1", entity_name = "base_link"):
         self.twist_pub = twist_pub
@@ -150,6 +149,7 @@ class ActionExecutor():
 
         self.got_new_plan = False
         self.check = False
+        self.lane = 1
 
         self.FV = None
         self.BV = None
@@ -201,8 +201,7 @@ class ActionExecutor():
         self.old_policy = self.policy
         self.got_new_plan = True
         self.policy_exe = PolicyExecutor(robot_1.rfdist,robot_1.lfdist,robot_1.bdist,self.msg.v_relative)
-        self.policy_exe.SetInit(self.step)
-        #self.timestep = self.step
+        self.policy_exe.SetInit(self.step, self.lane)
         self.policy_exe.Policy()
         self.policy = self.policy_exe.policy
         for i in range(10):
@@ -255,6 +254,7 @@ class ActionExecutor():
             left_check = False
 
         if right_check:
+            self.lane = 1
             if (robot_1.rfdist > robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist > robot_1.bdist_th):
                 self.step = 0
             elif(robot_1.rfdist > robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist < robot_1.bdist_th):
@@ -268,6 +268,7 @@ class ActionExecutor():
             elif(robot_1.rfdist < robot_1.rfdist_th and robot_1.lfdist < robot_1.lfdist_th and robot_1.bdist > robot_1.bdist_th):
                 self.step = 5
         if mid_check:
+            self.lane = 2
             if(robot_1.rfdist > robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist > robot_1.bdist_th):
                 self.step = 6
             elif(robot_1.rfdist > robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist < robot_1.bdist_th):
@@ -275,6 +276,7 @@ class ActionExecutor():
             elif(robot_1.rfdist < robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist > robot_1.bdist_th):
                 self.step = 8
         if left_check:
+            self.lane = 3
             if(robot_1.rfdist > robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist > robot_1.bdist_th):
                 self.step = 9
             elif(robot_1.rfdist > robot_1.rfdist_th and robot_1.lfdist > robot_1.lfdist_th and robot_1.bdist < robot_1.bdist_th):
@@ -317,7 +319,8 @@ class ActionExecutor():
                                 left_check = True
                         else:
                                 left_check = False
-                        if (1 < husky_1.bdist < 4) or (math.floor(husky_1.rfdist_th) < husky_1.rfdist < husky_1.rfdist_th) or left_check:
+                        check_request = husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative or left_check
+                        if check_request:
                             self.get_policy(husky_1)
                             rate.sleep()
 
