@@ -1,4 +1,4 @@
-## Formal-Control
+## Formal Control
 
 1. roslaunch multihusky_gazebo traffic.launch
 2. roslaunch multihusky_gazebo traffic.launch
