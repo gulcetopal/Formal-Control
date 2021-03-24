@@ -36,7 +36,7 @@ class Robot():
         self.lfdist = 0
         self.bdist = 0
 
-        self.rfdist_th = 4.3
+        self.rfdist_th = 4
         self.lfdist_th = -1
         self.bdist_th = 1
 
