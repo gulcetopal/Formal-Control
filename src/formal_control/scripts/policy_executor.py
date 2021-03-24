@@ -14,7 +14,7 @@ class PolicyExecutor():
         self.rfdist = rfdist
         self.lfdist = lfdist
         self.bdist = bdist
-        self.lane = self.lane
+        self.lane = lane
         self.v = v
         self.main()
 

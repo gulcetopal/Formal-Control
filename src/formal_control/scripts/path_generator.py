@@ -44,8 +44,6 @@ class PathGenerator():
         self.y_array = []
         self.trajx_array = []
         self.trajy_array = []
-        self.est_x = []
-        self.est_y = []
         self.path_x = []
         self.path_y = []
         self.w = []
@@ -123,7 +121,7 @@ class PathGenerator():
 
         for i in range(len(self.policy)-1):
             if (((self.policy[i+1]) == 6) or ((self.policy[i+1]) == 7) or ((self.policy[i+1]) == 8) or mid_check_array[i]):
-                pt.xs = pt.xs + 1
+                pt.xs = pt.xs + 1.5
             else:
                 pt.xs = pt.xs + 1
             self.trajx.append(pt.xs)
