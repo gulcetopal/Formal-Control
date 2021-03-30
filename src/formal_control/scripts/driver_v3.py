@@ -82,7 +82,8 @@ class pure_pursuit:
         self.path_points_y = []
         self.path_points_w = []
         self.dist_arr = []
-        filename = os.path.join('/home/gulce/final_ws/src/path/path.csv')
+        self.path_dir = rospy.get_param('Directory/path')
+        filename = os.path.join(self.path_dir)
         with open(filename) as f:
             path_points = [tuple(line) for line in csv.reader(f)]
 
