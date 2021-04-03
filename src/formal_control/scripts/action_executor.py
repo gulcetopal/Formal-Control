@@ -35,7 +35,7 @@ class Robot():
         self.lfdist = 0
         self.bdist = 0
 
-        self.rfdist_th = 4
+        self.rfdist_th = 4.5
         self.lfdist_th = -1
         self.bdist_th = 1
 
@@ -157,8 +157,13 @@ class ActionExecutor():
         print("Relative vel: "+ str(self.v))
 
     def adjust_threshold(self):
-        TIME = 3
-        #self.rfdist_th = 
+        PRISM_TIME = 3
+        OVERTAKE_TIME = 2
+
+        prism_th = PRISM_TIME * self.v
+        overtake_th = OVERTAKE_TIME * self.v
+        self.rfdist_th = prism_th + overtake_th
+        print("RF Threshold: "+ str(self.rfdist_th))
         
 
     def check_state(self, robot_1, timestep):
@@ -235,6 +240,7 @@ class ActionExecutor():
             self.get_params(husky_1,husky_2)
             self.check_distance(husky_1,husky_2)
             self.check_velocity(husky_1,husky_2)
+            self.adjust_threshold()
             self.check_state(husky_1, self.timestep)
 
             #print("Timestepim: " + str(self.timestep))
