@@ -16,7 +16,7 @@
 
 (defclass formal_control::SelfStateMsg
   :super ros::object
-  :slots (_header _rfdist _lfdist _bdist _v_relative _policy _timestep _v_refx _yaw_ref _got_new_plan ))
+  :slots (_header _rfdist _lfdist _bdist _v_relative _policy _old_policy _timestep _v_refx _yaw_ref _got_new_plan ))
 
 (defmethod formal_control::SelfStateMsg
   (:init
@@ -27,6 +27,7 @@
     ((:bdist __bdist) 0.0)
     ((:v_relative __v_relative) 0.0)
     ((:policy __policy) (make-array 0 :initial-element 0 :element-type :integer))
+    ((:old_policy __old_policy) (make-array 0 :initial-element 0 :element-type :integer))
     ((:timestep __timestep) 0)
     ((:v_refx __v_refx) 0.0)
     ((:yaw_ref __yaw_ref) 0.0)
@@ -39,6 +40,7 @@
    (setq _bdist (float __bdist))
    (setq _v_relative (float __v_relative))
    (setq _policy __policy)
+   (setq _old_policy __old_policy)
    (setq _timestep (round __timestep))
    (setq _v_refx (float __v_refx))
    (setq _yaw_ref (float __yaw_ref))
@@ -66,6 +68,9 @@
   (:policy
    (&optional __policy)
    (if __policy (setq _policy __policy)) _policy)
+  (:old_policy
+   (&optional __old_policy)
+   (if __old_policy (setq _old_policy __old_policy)) _old_policy)
   (:timestep
    (&optional __timestep)
    (if __timestep (setq _timestep __timestep)) _timestep)
@@ -93,6 +98,8 @@
     4
     ;; int32[] _policy
     (* 4    (length _policy)) 4
+    ;; int32[] _old_policy
+    (* 4    (length _old_policy)) 4
     ;; int32 _timestep
     4
     ;; float32 _v_refx
@@ -120,6 +127,11 @@
      (write-long (length _policy) s)
      (dotimes (i (length _policy))
        (write-long (elt _policy i) s)
+       )
+     ;; int32[] _old_policy
+     (write-long (length _old_policy) s)
+     (dotimes (i (length _old_policy))
+       (write-long (elt _old_policy i) s)
        )
      ;; int32 _timestep
        (write-long _timestep s)
@@ -150,6 +162,13 @@
      (dotimes (i n)
      (setf (elt _policy i) (sys::peek buf ptr- :integer)) (incf ptr- 4)
      ))
+   ;; int32[] _old_policy
+   (let (n)
+     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     (setq _old_policy (instantiate integer-vector n))
+     (dotimes (i n)
+     (setf (elt _old_policy i) (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     ))
    ;; int32 _timestep
      (setq _timestep (sys::peek buf ptr- :integer)) (incf ptr- 4)
    ;; float32 _v_refx
@@ -162,7 +181,7 @@
    self)
   )
 
-(setf (get formal_control::SelfStateMsg :md5sum-) "443649e18f869d4801a49ae1419aa278")
+(setf (get formal_control::SelfStateMsg :md5sum-) "bd52163242caa5ce9ef7b6ebfe345330")
 (setf (get formal_control::SelfStateMsg :datatype-) "formal_control/SelfStateMsg")
 (setf (get formal_control::SelfStateMsg :definition-)
       "std_msgs/Header header
@@ -173,6 +192,7 @@ float32 bdist
 float32 v_relative
 
 int32[] policy
+int32[] old_policy
 int32 timestep
 
 float32 v_refx
@@ -205,6 +225,6 @@ string frame_id
 
 
 
-(provide :formal_control/SelfStateMsg "443649e18f869d4801a49ae1419aa278")
+(provide :formal_control/SelfStateMsg "bd52163242caa5ce9ef7b6ebfe345330")
 
 

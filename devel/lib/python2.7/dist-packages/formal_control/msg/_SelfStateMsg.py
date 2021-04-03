@@ -8,7 +8,7 @@ import struct
 import std_msgs.msg
 
 class SelfStateMsg(genpy.Message):
-  _md5sum = "443649e18f869d4801a49ae1419aa278"
+  _md5sum = "bd52163242caa5ce9ef7b6ebfe345330"
   _type = "formal_control/SelfStateMsg"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """std_msgs/Header header
@@ -19,6 +19,7 @@ float32 bdist
 float32 v_relative
 
 int32[] policy
+int32[] old_policy
 int32 timestep
 
 float32 v_refx
@@ -47,8 +48,8 @@ time stamp
 # 1: global frame
 string frame_id
 """
-  __slots__ = ['header','rfdist','lfdist','bdist','v_relative','policy','timestep','v_refx','yaw_ref','got_new_plan']
-  _slot_types = ['std_msgs/Header','float32','float32','float32','float32','int32[]','int32','float32','float32','bool']
+  __slots__ = ['header','rfdist','lfdist','bdist','v_relative','policy','old_policy','timestep','v_refx','yaw_ref','got_new_plan']
+  _slot_types = ['std_msgs/Header','float32','float32','float32','float32','int32[]','int32[]','int32','float32','float32','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -58,7 +59,7 @@ string frame_id
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,rfdist,lfdist,bdist,v_relative,policy,timestep,v_refx,yaw_ref,got_new_plan
+       header,rfdist,lfdist,bdist,v_relative,policy,old_policy,timestep,v_refx,yaw_ref,got_new_plan
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -79,6 +80,8 @@ string frame_id
         self.v_relative = 0.
       if self.policy is None:
         self.policy = []
+      if self.old_policy is None:
+        self.old_policy = []
       if self.timestep is None:
         self.timestep = 0
       if self.v_refx is None:
@@ -94,6 +97,7 @@ string frame_id
       self.bdist = 0.
       self.v_relative = 0.
       self.policy = []
+      self.old_policy = []
       self.timestep = 0
       self.v_refx = 0.
       self.yaw_ref = 0.
@@ -125,6 +129,10 @@ string frame_id
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
       buff.write(struct.pack(pattern, *self.policy))
+      length = len(self.old_policy)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(struct.pack(pattern, *self.old_policy))
       _x = self
       buff.write(_get_struct_i2fB().pack(_x.timestep, _x.v_refx, _x.yaw_ref, _x.got_new_plan))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
@@ -163,6 +171,13 @@ string frame_id
       start = end
       end += struct.calcsize(pattern)
       self.policy = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.old_policy = struct.unpack(pattern, str[start:end])
       _x = self
       start = end
       end += 13
@@ -194,6 +209,10 @@ string frame_id
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
       buff.write(self.policy.tostring())
+      length = len(self.old_policy)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(self.old_policy.tostring())
       _x = self
       buff.write(_get_struct_i2fB().pack(_x.timestep, _x.v_refx, _x.yaw_ref, _x.got_new_plan))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
@@ -233,6 +252,13 @@ string frame_id
       start = end
       end += struct.calcsize(pattern)
       self.policy = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=length)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.old_policy = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=length)
       _x = self
       start = end
       end += 13

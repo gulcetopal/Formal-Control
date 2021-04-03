@@ -25,6 +25,7 @@ class SelfStateMsg {
       this.bdist = null;
       this.v_relative = null;
       this.policy = null;
+      this.old_policy = null;
       this.timestep = null;
       this.v_refx = null;
       this.yaw_ref = null;
@@ -67,6 +68,12 @@ class SelfStateMsg {
       else {
         this.policy = [];
       }
+      if (initObj.hasOwnProperty('old_policy')) {
+        this.old_policy = initObj.old_policy
+      }
+      else {
+        this.old_policy = [];
+      }
       if (initObj.hasOwnProperty('timestep')) {
         this.timestep = initObj.timestep
       }
@@ -108,6 +115,8 @@ class SelfStateMsg {
     bufferOffset = _serializer.float32(obj.v_relative, buffer, bufferOffset);
     // Serialize message field [policy]
     bufferOffset = _arraySerializer.int32(obj.policy, buffer, bufferOffset, null);
+    // Serialize message field [old_policy]
+    bufferOffset = _arraySerializer.int32(obj.old_policy, buffer, bufferOffset, null);
     // Serialize message field [timestep]
     bufferOffset = _serializer.int32(obj.timestep, buffer, bufferOffset);
     // Serialize message field [v_refx]
@@ -135,6 +144,8 @@ class SelfStateMsg {
     data.v_relative = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [policy]
     data.policy = _arrayDeserializer.int32(buffer, bufferOffset, null)
+    // Deserialize message field [old_policy]
+    data.old_policy = _arrayDeserializer.int32(buffer, bufferOffset, null)
     // Deserialize message field [timestep]
     data.timestep = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [v_refx]
@@ -150,7 +161,8 @@ class SelfStateMsg {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
     length += 4 * object.policy.length;
-    return length + 33;
+    length += 4 * object.old_policy.length;
+    return length + 37;
   }
 
   static datatype() {
@@ -160,7 +172,7 @@ class SelfStateMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '443649e18f869d4801a49ae1419aa278';
+    return 'bd52163242caa5ce9ef7b6ebfe345330';
   }
 
   static messageDefinition() {
@@ -174,6 +186,7 @@ class SelfStateMsg {
     float32 v_relative
     
     int32[] policy
+    int32[] old_policy
     int32 timestep
     
     float32 v_refx
@@ -251,6 +264,13 @@ class SelfStateMsg {
     }
     else {
       resolved.policy = []
+    }
+
+    if (msg.old_policy !== undefined) {
+      resolved.old_policy = msg.old_policy;
+    }
+    else {
+      resolved.old_policy = []
     }
 
     if (msg.timestep !== undefined) {

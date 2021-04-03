@@ -31,6 +31,7 @@ struct SelfStateMsg_
     , bdist(0.0)
     , v_relative(0.0)
     , policy()
+    , old_policy()
     , timestep(0)
     , v_refx(0.0)
     , yaw_ref(0.0)
@@ -43,6 +44,7 @@ struct SelfStateMsg_
     , bdist(0.0)
     , v_relative(0.0)
     , policy(_alloc)
+    , old_policy(_alloc)
     , timestep(0)
     , v_refx(0.0)
     , yaw_ref(0.0)
@@ -69,6 +71,9 @@ struct SelfStateMsg_
 
    typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _policy_type;
   _policy_type policy;
+
+   typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _old_policy_type;
+  _old_policy_type old_policy;
 
    typedef int32_t _timestep_type;
   _timestep_type timestep;
@@ -160,12 +165,12 @@ struct MD5Sum< ::formal_control::SelfStateMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "443649e18f869d4801a49ae1419aa278";
+    return "bd52163242caa5ce9ef7b6ebfe345330";
   }
 
   static const char* value(const ::formal_control::SelfStateMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x443649e18f869d48ULL;
-  static const uint64_t static_value2 = 0x01a49ae1419aa278ULL;
+  static const uint64_t static_value1 = 0xbd52163242caa5ceULL;
+  static const uint64_t static_value2 = 0x9ef7b6ebfe345330ULL;
 };
 
 template<class ContainerAllocator>
@@ -192,6 +197,7 @@ float32 bdist\n\
 float32 v_relative\n\
 \n\
 int32[] policy\n\
+int32[] old_policy\n\
 int32 timestep\n\
 \n\
 float32 v_refx\n\
@@ -243,6 +249,7 @@ namespace serialization
       stream.next(m.bdist);
       stream.next(m.v_relative);
       stream.next(m.policy);
+      stream.next(m.old_policy);
       stream.next(m.timestep);
       stream.next(m.v_refx);
       stream.next(m.yaw_ref);
@@ -281,6 +288,12 @@ struct Printer< ::formal_control::SelfStateMsg_<ContainerAllocator> >
     {
       s << indent << "  policy[" << i << "]: ";
       Printer<int32_t>::stream(s, indent + "  ", v.policy[i]);
+    }
+    s << indent << "old_policy[]" << std::endl;
+    for (size_t i = 0; i < v.old_policy.size(); ++i)
+    {
+      s << indent << "  old_policy[" << i << "]: ";
+      Printer<int32_t>::stream(s, indent + "  ", v.old_policy[i]);
     }
     s << indent << "timestep: ";
     Printer<int32_t>::stream(s, indent + "  ", v.timestep);
