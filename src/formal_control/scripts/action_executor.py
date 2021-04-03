@@ -35,7 +35,7 @@ class Robot():
         self.lfdist = 0
         self.bdist = 0
 
-        self.rfdist_th = 5
+        self.rfdist_th = 4
         self.lfdist_th = -1
         self.bdist_th = 1
 
@@ -155,6 +155,10 @@ class ActionExecutor():
         print("Husky 1 vel: "+ str(robot_1.vx))
         print("Husky 2 vel: "+ str(robot_2.vx))
         print("Relative vel: "+ str(self.v))
+
+    def adjust_threshold(self):
+        TIME = 3
+        #self.rfdist_th = 
         
 
     def check_state(self, robot_1, timestep):

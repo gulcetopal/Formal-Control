@@ -195,12 +195,15 @@ class pure_pursuit:
         self.msg.angular.z = self.angularz
 
     	self.twist_pub.publish(self.msg)
-        #self.go_forward(0.5)
+        self.go_forward(0.5)
 
     def go_forward(self,speed = 0.5, secs = 0.15 ):
         rate = rospy.Rate(10)
         self.twist.linear.x = speed
         self.twist.angular.z = 0
+        for i in range(int(secs * 10)):
+            self.h2_pub.publish(self.twist)
+            rate.sleep()
 
     def set_speed(self,angle):
         if (abs(angle)>0.2018):
