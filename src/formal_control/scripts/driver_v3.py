@@ -37,11 +37,11 @@ class pure_pursuit:
         self.LOOKAHEAD_DISTANCE = 1 # meters
         self.ld_th = 0.08
 
-        self.VELOCITY = 1 # m/s
+        self.VELOCITY = 1.0 # m/s
         self.read_waypoints()
 
         self.angle = 0
-        self.velocity = 1
+        self.velocity = 1.0
         self.angularz = 0
 
         self.model_name = 'Husky_h1'

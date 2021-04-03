@@ -156,14 +156,14 @@ class ActionExecutor():
         print("Husky 2 vel: "+ str(robot_2.vx))
         print("Relative vel: "+ str(self.v))
 
-    def adjust_threshold(self):
+    def adjust_threshold(self,robot_1,robot_2):
         PRISM_TIME = 3
-        OVERTAKE_TIME = 2
+        OVERTAKE_TIME = 3
 
         prism_th = PRISM_TIME * self.v
-        overtake_th = OVERTAKE_TIME * self.v
-        self.rfdist_th = prism_th + overtake_th
-        print("RF Threshold: "+ str(self.rfdist_th))
+        overtake_th = OVERTAKE_TIME * robot_1.vx #self.v
+        robot_1.rfdist_th = prism_th + overtake_th
+        #print("RF Threshold: "+ str(self.rfdist_th))
         
 
     def check_state(self, robot_1, timestep):
@@ -220,7 +220,7 @@ class ActionExecutor():
 
 # Main
     def main(self):
-        rate = rospy.Rate(1)
+        rate = rospy.Rate(3)
 
         while self.latest_state_data is None:
             rospy.sleep(0.1)
@@ -240,7 +240,7 @@ class ActionExecutor():
             self.get_params(husky_1,husky_2)
             self.check_distance(husky_1,husky_2)
             self.check_velocity(husky_1,husky_2)
-            self.adjust_threshold()
+            self.adjust_threshold(husky_1,husky_2)
             self.check_state(husky_1, self.timestep)
 
             #print("Timestepim: " + str(self.timestep))
@@ -261,15 +261,15 @@ class ActionExecutor():
                 self.get_policy(husky_1)
                 self.state = 2
             elif self.state == 1:
-                check_request1 = (1 < husky_1.bdist < husky_1.bdist_th+0.3) or (3.9 < husky_1.rfdist < husky_1.rfdist_th) or left_check
+                check_request1 = (1 < husky_1.bdist < husky_1.bdist_th+0.3) or (husky_1.rfdist_th-husky_1.vx < husky_1.rfdist < husky_1.rfdist_th) or left_check
                 #check_request1 = 80 > husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist_th*self.msg.v_relative-0.1 < husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative
                 #check_request2 =  or (self.policy[len(self.policy)-1] == self.step) or not (self.step in self.policy)
-                """print("Policy bdist: " + str(husky_1.bdist))
-                print("Policy bdistth: " + str(husky_1.bdist_th*self.msg.v_relative))
-                print("Policy fdist: " + str(husky_1.rfdist))
-                print("Policy fdistth: " + str(husky_1.rfdist_th*self.msg.v_relative-0.1))
-                print("Policy fdistthhh: " + str(husky_1.rfdist_th*self.msg.v_relative))
-                print("\n")"""
+                #print("Policy bdist: " + str(husky_1.bdist))
+                #print("Policy bdistth: " + str(husky_1.bdist_th*self.msg.v_relative))
+                print("fdist: " + str(husky_1.rfdist))
+                print("fdistth: " + str(husky_1.rfdist_th))
+                #print("Policy fdistthhh: " + str(husky_1.rfdist_th*self.msg.v_relative))
+                print("\n")
                 if check_request1:
                     self.state = 0
             elif self.state == 2:
@@ -282,7 +282,7 @@ class ActionExecutor():
             self.msg.got_new_plan = self.got_new_plan
             self.policy_pub.publish(self.msg)
 
-
+            rate.sleep()
 
 if __name__ == '__main__':
     ActionExecutor()
