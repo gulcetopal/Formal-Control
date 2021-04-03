@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="logoutput" default="screen"/>
+
+    <node name="main_driver" pkg="formal_control" type="driver_v3.py" output="$(arg logoutput)"/>
+    <node name="environmental_driver" pkg="formal_control" type="multi_cars.py" output="$(arg logoutput)"/>
+
+</launch>

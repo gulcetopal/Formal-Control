@@ -34,13 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <launch>
 
-  <arg name="laser_enabled" default="true"/>
+  <arg name="laser_enabled" default="false"/>
   <arg name="kinect_enabled" default="false"/>
   <arg name="multimaster" default="false"/>
-  <arg name="lead_husky_robot_namespace" default="h1"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find multihusky_gazebo)/worlds/shehan1.world"/>
+    <arg name="world_name" value="$(find multihusky_gazebo)/worlds/road.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -50,26 +49,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   <group ns="h1">
     <include file="$(find multihusky_gazebo)/launch/spawn_multihusky.launch">
-        <arg name="robot_namespace" value="h1" />
-        <arg name="x" value="1.0" />
-        <arg name="y" value="-0.915" />
-        <arg name="yaw" value="0.0" />
-        <arg name="laser_enabled" value="$(arg laser_enabled)"/>
-        <arg name="kinect_enabled" value="$(arg kinect_enabled)"/>
+      <arg name="robot_namespace" value="h1" />
+      <arg name="x" value="1.0" />
+      <arg name="y" value="-2.745" />
+      <arg name="yaw" value="0" />
+      <arg name="laser_enabled" value="$(arg laser_enabled)"/>
+      <arg name="kinect_enabled" value="$(arg kinect_enabled)"/>
     </include>
   </group>
 
   <group ns="h2">
     <include file="$(find multihusky_gazebo)/launch/spawn_multihusky.launch">
-        <arg name="robot_namespace" value="h2" />
-        <arg name="x" value="9.0" />
-        <arg name="y" value="-0.915" />
-        <arg name="yaw" value="0.0" />
-        <arg name="laser_enabled" value="$(arg laser_enabled)"/>
-        <arg name="kinect_enabled" value="true"/>
+      <arg name="robot_namespace" value="h2" />
+      <arg name="x" value="8.0" />
+      <arg name="y" value="-2.745" /> 
+      <arg name="yaw" value="0" />
+      <arg name="laser_enabled" value="$(arg laser_enabled)"/>
+      <arg name="kinect_enabled" value="$(arg kinect_enabled)"/>
     </include>
   </group>
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find multihusky_viz)/rviz/multihusky_viz_withcamera_.rviz" output="screen"/>
+  <group ns="h3">
+    <include file="$(find multihusky_gazebo)/launch/spawn_multihusky.launch">
+      <arg name="robot_namespace" value="h3" />
+      <arg name="x" value="30.0" />
+      <arg name="y" value="-1.45" /> 
+      <arg name="yaw" value="-3.14" />
+      <arg name="laser_enabled" value="$(arg laser_enabled)"/>
+      <arg name="kinect_enabled" value="$(arg kinect_enabled)"/>
+    </include>
+  </group>
+
+
+  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find multihusky_viz)/rviz/multihusky_viz_withcamera_.rviz" output="screen"/-->
 
 </launch>

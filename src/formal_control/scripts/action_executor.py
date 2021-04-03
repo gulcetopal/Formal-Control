@@ -54,7 +54,7 @@ class Robot():
 
 class ActionExecutor():
     def __init__(self,policy = [0] ):
-        rospy.init_node('ActionExecutor')
+        rospy.init_node('action_executor')
         rospy.Subscriber("/gazebo/model_states", ModelStates, self.StateCallback)
         rospy.Subscriber("/traffic_robot_state", SelfStateMsg, self.TimestepCallback)
 
@@ -106,6 +106,7 @@ class ActionExecutor():
         robot_2.x = self.latest_state_data.pose[self.latest_state_data.name.index(robot_2.model_name)].position.x
         robot_1.y = self.latest_state_data.pose[self.latest_state_data.name.index(robot_1.model_name)].position.y
         robot_2.y = self.latest_state_data.pose[self.latest_state_data.name.index(robot_2.model_name)].position.y
+        
         robot_1.vx = self.latest_state_data.twist[self.latest_state_data.name.index(robot_1.model_name)].linear.x
         robot_2.vx = self.latest_state_data.twist[self.latest_state_data.name.index(robot_2.model_name)].linear.x
         i = self.latest_state_data.name.index(robot_1.model_name)
