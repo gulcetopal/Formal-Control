@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <arg name="multimaster" default="false"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find multihusky_gazebo)/worlds/fancyroad.world"/>
+    <arg name="world_name" value="$(find multihusky_gazebo)/worlds/road.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <group ns="h2">
     <include file="$(find multihusky_gazebo)/launch/spawn_multihusky.launch">
       <arg name="robot_namespace" value="h2" />
-      <arg name="x" value="7.0" />
+      <arg name="x" value="8.0" />
       <arg name="y" value="-2.745" /> <!-- (-0.915)-->
       <arg name="yaw" value="0" />
       <arg name="laser_enabled" value="$(arg laser_enabled)"/>

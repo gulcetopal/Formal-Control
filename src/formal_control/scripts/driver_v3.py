@@ -34,14 +34,14 @@ class pure_pursuit:
         rospy.Subscriber("/traffic_topic", SelfStateMsg, self.TrafficCallback)
         rospy.Subscriber("/path_data", PathMsg, self.PathCallback)
 
-        self.LOOKAHEAD_DISTANCE = 0.5 # meters
-        self.ld_th = 0.05
+        self.LOOKAHEAD_DISTANCE = 1 # meters
+        self.ld_th = 0.08
 
-        self.VELOCITY = 1.5 # m/s
+        self.VELOCITY = 1 # m/s
         self.read_waypoints()
 
         self.angle = 0
-        self.velocity = 1.5
+        self.velocity = 1
         self.angularz = 0
 
         self.model_name = 'Husky_h1'
@@ -129,23 +129,6 @@ class pure_pursuit:
                 goal = idx
                 break
 
-        #print("Goal: " + str(goal))
-
-        """else:
-                if len(goal_arr) == 0:
-                    goal = len(self.dist_arr)-1
-                else:
-                    goal = goal_arr[len(goal_arr)-1]
-                    """
-        #print("Goal: " + str(goal))
-
-        #i = goal
-        i = len(self.path_points_x)-1
-        if ((x < self.path_points_x[i]+0.05)&( x > self.path_points_x[i]-0.05)):
-            self.target_reached = True
-        else:
-            self.target_reached = False
-
 
         L = self.dist_arr[goal]
 
@@ -161,20 +144,21 @@ class pure_pursuit:
         goal_x_veh_coord = gvcx*np.cos(yaw) + gvcy*np.sin(yaw)
         goal_y_veh_coord = gvcy*np.cos(yaw) - gvcx*np.sin(yaw)
 
-        alpha = self.path_points_w[goal] - (yaw)
+        #alpha = self.path_points_w[goal] - (yaw)
+        alpha = math.atan(gvcy/gvcx) - (yaw)
 
         k = 2 * math.sin(alpha)/L
         angle_i = math.atan(k*0.4)
         self.angularz = k*self.velocity
         #print("\n")
         #print("Alpha: " + str(math.degrees(alpha)))
-        #print("Angular Velocity: " + str(math.degrees(self.angularz)))
+        print("Angular Velocity: " + str(math.degrees(self.angularz)))
 
         angle = angle_i*2
         #angle = np.clip(angle, -0.4189, 0.4189) # 0.4189 radians = 24 degrees because car can only turn 24 degrees max
 
-        left_mid_th = 0.2
-        right_mid_th = 0.2
+        left_mid_th = 0.3
+        right_mid_th = 0.3
         stp = 0.1
 
         if abs(y + 2.745) < right_mid_th or y < -2.9:
@@ -261,9 +245,6 @@ if __name__ == '__main__':
             if PP.path_data != []:
                 PP.read_waypoints()
                 PP.baby_driver()
-                #if PP.target_reached:
-                #    PP.got_new_plan = False
 
-            #print("GNP: " + str(PP.got_new_plan))
                 PP.send_command()
         rate.sleep()

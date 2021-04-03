@@ -6,6 +6,7 @@ float32 bdist
 float32 v_relative
 
 int32[] policy
+int32[] old_policy
 int32 timestep
 
 float32 v_refx

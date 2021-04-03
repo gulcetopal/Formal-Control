@@ -22,13 +22,12 @@ class Robot():
         self.scan_topic = scan_topic
         self.odom_topic = odom_topic
         self.imu_topic = imu_topic
-        self.goal_tolerance = 0.2
+
         self.x = 0
         self.y = 0
         self.yaw = 0
         self.twist = Twist()
-        self.latest_scan = None
-        self.dist = 0
+
         self.model_name = model_name
         self.entity_name = entity_name
 
@@ -36,116 +35,38 @@ class Robot():
         self.lfdist = 0
         self.bdist = 0
 
-        self.rfdist_th = 4
+        self.rfdist_th = 5
         self.lfdist_th = -1
         self.bdist_th = 1
 
         self.vx = 0
+        self.vy = 0
+        self.angularz = 0
         self.v_refx = 5
         self.v_refy = 0
 
         self.main()
 
-#   Callbacks
-    def imuCallback(self, data):
-	    [roll, pitch, self.yaw] = euler_from_quaternion([data.orientation.x, data.orientation.y, data.orientation.z, data.orientation.w]) #Convert quaternion to euler angles
-	    self.yaw = self.fix_yaw(self.yaw)
-
-    def Odomcallback(self, data):
-        x = data.pose.pose.position.x
-        y = data.pose.pose.position.y
-        self.x = x
-        self.y = y
-
-#   Robot Actions
-    def reset_twist(self):
-        self.twist.linear.x  = 0
-        self.twist.linear.y  = 0
-        self.twist.linear.z  = 0
-        self.twist.angular.x = 0
-        self.twist.angular.y = 0
-        self.twist.angular.z = 0
-        self.twist_pub.publish(self.twist)
-
-    def control_dist(self, goal):
-        self.dist = float(math.sqrt(math.pow((goal[0] - self.x), 2) + math.pow((goal[1] - self.y), 2)))
-        return self.dist > self.goal_tolerance
-
-    def turn(self, speed, secs = 0.15):
-        rate = rospy.Rate(10)
-        self.twist.angular.z = speed
-        for i in range(int(secs * 10)):
-            self.twist_pub.publish(self.twist)
-            rate.sleep()
-        self.reset_twist()
-
-    def go_forward(self,speed = 0.5, secs = 0.15 ):
-        rate = rospy.Rate(10)
-        self.twist.linear.x = speed
-        self.twist.angular.z = 0
-        for i in range(int(secs * 10)):
-                self.twist_pub.publish(self.twist)
-                rate.sleep()
-        #print("Distance to target: " + str(self.dist))
-
-    def yanal_go_forward(self, speedx = 0.5, speedy = 0.2, angularz = math.pi/10, secs = 0.15 ):
-        rate = rospy.Rate(5)
-        self.twist.linear.x = speedx
-        self.twist.linear.y = speedy
-        self.twist.angular.z = angularz
-        for i in range(int(secs * 10)):
-            if abs(self.yaw-self.yaw_ref)<=0.1:
-                self.twist.angular.z = 0
-            else:
-                self.twist.angular.z = angularz
-            self.twist_pub.publish(self.twist)
-            rate.sleep()
-        #print("Distance to target: " + str(self.dist))
-
-#   Robot Behaviour Definitions
-    def free_ride(self):
-        self.go_forward(self.v_refx)
-
-    def sheer_in(self):
-        self.yanal_go_forward(self.v_refx,-self.v_refy,self.yaw_ref)
-
-    def sheer_out(self):
-        self.yanal_go_forward(self.v_refx,self.v_refy, self.yaw_ref)
-
-    def faster(self):
-        inc = 0.2
-        self.v_refx = self.v_refx+inc
-        self.go_forward(self.v_refx)
-
-    def slower(self):
-        inc = -0.2
-        self.v_refx = self.v_refx+inc
-        self.go_forward(self.v_refx)
-
 #   Main
     def main(self):
-        #rospy.Subscriber(self.odom_topic, Odometry, self.Odomcallback)
-        #rospy.Subscriber(self.imu_topic, Imu, self.imuCallback)
         main_start = 1
 
 
 class ActionExecutor():
     def __init__(self,policy = [0] ):
         rospy.init_node('ActionExecutor')
-        rospy.Subscriber("/h1/scan", LaserScan, self.LidarCallback)
         rospy.Subscriber("/gazebo/model_states", ModelStates, self.StateCallback)
         rospy.Subscriber("/traffic_robot_state", SelfStateMsg, self.TimestepCallback)
 
         self.policy = policy
         self.policy_pub = rospy.Publisher("/traffic_topic", SelfStateMsg, queue_size = 50)
-        self.husky_1_pub = rospy.Publisher("/h1/husky_velocity_controller/cmd_vel", Twist, queue_size = 50)
-        self.husky_2_pub = rospy.Publisher("/h2/husky_velocity_controller/cmd_vel", Twist, queue_size = 50)
 
         self.old_policy = []
         self.v = 0
 
         self.timestep = 0
         self.step = 0
+        self.state = 2 # start from state: wait for order
 
         self.got_new_plan = False
         self.check = False
@@ -163,9 +84,6 @@ class ActionExecutor():
         self.main()
 
 #   Callbacks and fixes
-    def LidarCallback(self,data):
-        self.latest_scan = data.ranges
-
     def StateCallback(self,data):
         self.latest_state_data = data
 
@@ -229,8 +147,14 @@ class ActionExecutor():
         print("\n")
 
     def check_velocity(self,robot_1,robot_2):
-        self.v =robot_1.vx-robot_2.vx
+    	robot1v = robot_1.vx
+        robot2v = robot_2.vx
+        self.v = robot1v-robot2v
         self.msg.v_relative = self.v
+        print("Husky 1 vel: "+ str(robot_1.vx))
+        print("Husky 2 vel: "+ str(robot_2.vx))
+        print("Relative vel: "+ str(self.v))
+        
 
     def check_state(self, robot_1, timestep):
         right_array = [0, 1, 2, 3, 4, 5]
@@ -287,12 +211,12 @@ class ActionExecutor():
 # Main
     def main(self):
         rate = rospy.Rate(1)
-        self.got_new_plan = False
+
         while self.latest_state_data is None:
             rospy.sleep(0.1)
 
-        husky_1 = Robot(self.husky_1_pub, "/h1/scan", "/h1/odometry/filtered", "/h1/imu/data","Husky_h1")
-        husky_2 = Robot(self.husky_2_pub, "/h2/scan", "/h2/odometry/filtered", "/h2/imu/data","Husky_h2")
+        husky_1 = Robot("/h1/husky_velocity_controller/cmd_vel", "/h1/scan", "/h1/odometry/filtered", "/h1/imu/data","Husky_h1")
+        husky_2 = Robot("/h2/husky_velocity_controller/cmd_vel", "/h2/scan", "/h2/odometry/filtered", "/h2/imu/data","Husky_h2")
 
         left_array = [9, 10, 11]
 
@@ -312,42 +236,41 @@ class ActionExecutor():
             print("Policy Step: " + str(self.step))
             print("\n")
 
-            if self.step in self.policy:
-                if (self.policy[len(self.policy)-1] != self.step):
-                    if self.v != 0:
-                        if self.step in left_array:
-                                left_check = True
-                        else:
-                                left_check = False
-                        check_request = husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative or left_check
-                        if check_request:
-                            self.get_policy(husky_1)
-                            rate.sleep()
+# States: 0 - Calculate Policy, 1 - Execute Policy, 2 - Wait for order
 
-                else:
-                    self.get_policy(husky_1)
-                    rate.sleep()
+            left_array = [9, 10, 11]
+            i = self.timestep
+
+            if i in left_array:
+                left_check = True
             else:
-                if len(self.policy) != 0:
-                    self.get_policy(husky_1)
-                    print("Error!")
-                    rate.sleep()
-                else:
-                    rate.sleep()
+                left_check = False
 
-            #print("Old pal: " + str(self.old_policy))
-            #print("Rook: " + str(self.policy))
+            if self.state == 0:
+                self.get_policy(husky_1)
+                self.state = 2
+            elif self.state == 1:
+                check_request1 = (1 < husky_1.bdist < husky_1.bdist_th+0.3) or (3.9 < husky_1.rfdist < husky_1.rfdist_th) or left_check
+                #check_request1 = 80 > husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist_th*self.msg.v_relative-0.1 < husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative
+                #check_request2 =  or (self.policy[len(self.policy)-1] == self.step) or not (self.step in self.policy)
+                """print("Policy bdist: " + str(husky_1.bdist))
+                print("Policy bdistth: " + str(husky_1.bdist_th*self.msg.v_relative))
+                print("Policy fdist: " + str(husky_1.rfdist))
+                print("Policy fdistth: " + str(husky_1.rfdist_th*self.msg.v_relative-0.1))
+                print("Policy fdistthhh: " + str(husky_1.rfdist_th*self.msg.v_relative))
+                print("\n")"""
+                if check_request1:
+                    self.state = 0
+            elif self.state == 2:
+                if self.got_new_plan:
+                    self.state = 1
+                    self.got_new_plan = False
 
-            if self.old_policy != self.policy:
-                self.got_new_plan = True
-                self.old_policy = self.policy
-                print("New Policy Calculated !")
-
+            self.msg.timestep = self.state
+            self.msg.old_policy = self.old_policy
             self.msg.got_new_plan = self.got_new_plan
             self.policy_pub.publish(self.msg)
 
-            if self.got_new_plan == True:
-                self.got_new_plan = False
 
 
 if __name__ == '__main__':
