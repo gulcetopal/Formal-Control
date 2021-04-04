@@ -35,7 +35,7 @@ class Robot():
         self.lfdist = 0
         self.bdist = 0
 
-        # Th değerleri tanım için var, adjust_threshold()dan değiştirilecek
+        # Th degerleri tanim icin var, adjust_threshold()dan degistirilecek
         self.rfdist_th = 0
         self.lfdist_th = -1
         self.bdist_th = 0
@@ -159,7 +159,7 @@ class ActionExecutor():
 
     def adjust_threshold(self,robot_1,robot_2):
         PRISM_TIME = 7
-        OVERTAKE_TIME = 1
+        OVERTAKE_TIME = 2
 
         prism_th = PRISM_TIME * self.v
         overtake_th = OVERTAKE_TIME * self.v #robot_1.vx #robot_1.vx * robot_1.vx / robot_2.vx #self.v
@@ -249,7 +249,7 @@ class ActionExecutor():
             self.check_state(husky_1, self.timestep)
 
             #print("Timestepim: " + str(self.timestep))
-            print("Policy Step: " + str(self.step))
+            print("Initial Step: " + str(self.step))
             print("\n")
 
             # States: 0 - Calculate Policy, 1 - Execute Policy, 2 - Wait for order
@@ -269,13 +269,13 @@ class ActionExecutor():
                 check_request1 = (0 < husky_1.bdist < husky_1.vx) or (husky_1.rfdist_th-husky_1.vx < husky_1.rfdist < husky_1.rfdist_th) #or left_check
                 #check_request1 = 80 > husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist_th*self.msg.v_relative-0.1 < husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative
                 #check_request2 =  or (self.policy[len(self.policy)-1] == self.step) or not (self.step in self.policy)
-                print("bdist: " + str(husky_1.bdist))
-                print("bdistth: " + str(husky_1.bdist_th))
+                print("Back Dist: " + str(husky_1.bdist))
+                print("Threshold: " + str(husky_1.vx))
                 print("\n")
                 #print("bdistth min: " + str(husky_1.bdist_th-husky_1.vx/5))
                 #print("bdistth max: " + str(husky_1.bdist_th+husky_1.vx/5))
-                print("fdist: " + str(husky_1.rfdist))
-                print("fdistth: " + str(husky_1.rfdist_th))
+                print("Front Dist: " + str(husky_1.rfdist))
+                print("Threshold : " + str(husky_1.rfdist_th))
                 #print("Policy fdistthhh: " + str(husky_1.rfdist_th*self.msg.v_relative))
                 print("\n")
                 if check_request1:

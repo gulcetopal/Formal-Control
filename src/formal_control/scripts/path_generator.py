@@ -51,12 +51,12 @@ class PathGenerator():
         self.policy_check = False
 
         rospy.Subscriber("/traffic_topic", SelfStateMsg, self.policyCallback)
-        rospy.Subscriber("/gazebo/model_states", ModelStates, self.StateCallback)
+        rospy.Subscriber("/gazebo/model_states", ModelStates, self.stateCallback)
         self.path_pub = rospy.Publisher("/path_data", PathMsg, queue_size = 50)
 
         self.main()
 
-    def StateCallback(self,data):
+    def stateCallback(self,data):
         self.latest_state_data = data
 
     def policyCallback(self,data):
@@ -121,9 +121,9 @@ class PathGenerator():
 
         for i in range(len(self.policy)-1):
             if (((self.policy[i+1]) == 6) or ((self.policy[i+1]) == 7) or ((self.policy[i+1]) == 8) or mid_check_array[i]):
-                pt.xs = pt.xs + 1.5
+                pt.xs = pt.xs + self.robot_vx*3/2   #1.5
             else:
-                pt.xs = pt.xs + 1
+                pt.xs = pt.xs + self.robot_vx       #1
             self.trajx.append(pt.xs)
 
         line = Point()

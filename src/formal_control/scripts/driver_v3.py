@@ -38,7 +38,7 @@ class pure_pursuit:
         self.H2_VELOCITY = 0.5 # m/s
         self.read_waypoints()
 
-        self.LOOKAHEAD_DISTANCE = 1 * self.VELOCITY # meters
+        self.LOOKAHEAD_DISTANCE = 2 * self.VELOCITY # meters
         self.ld_th = 0.08
 
         self.angle = 0
@@ -175,7 +175,7 @@ class pure_pursuit:
             print("Current Lane: -")
             self.ts_msg.got_new_plan = self.got_new_plan
         self.timestep_pub.publish(self.ts_msg)
-
+        
 
         #self.set_speed(angle)
         self.const_speed(angle)
