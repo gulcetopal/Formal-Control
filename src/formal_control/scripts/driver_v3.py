@@ -34,11 +34,12 @@ class pure_pursuit:
         rospy.Subscriber("/traffic_topic", SelfStateMsg, self.TrafficCallback)
         rospy.Subscriber("/path_data", PathMsg, self.PathCallback)
 
-        self.LOOKAHEAD_DISTANCE = 1 # meters
-        self.ld_th = 0.08
-
-        self.VELOCITY = 1.0 # m/s
+        self.VELOCITY    = 1.5 # m/s
+        self.H2_VELOCITY = 0.5 # m/s
         self.read_waypoints()
+
+        self.LOOKAHEAD_DISTANCE = 1 * self.VELOCITY # meters
+        self.ld_th = 0.08
 
         self.angle = 0
         self.velocity = 1.0
@@ -195,7 +196,7 @@ class pure_pursuit:
         self.msg.angular.z = self.angularz
 
     	self.twist_pub.publish(self.msg)
-        self.go_forward(0.5)
+        self.go_forward(self.H2_VELOCITY)
 
     def go_forward(self,speed = 0.5, secs = 0.15 ):
         rate = rospy.Rate(10)

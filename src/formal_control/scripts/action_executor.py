@@ -37,7 +37,7 @@ class Robot():
 
         self.rfdist_th = 4.5
         self.lfdist_th = -1
-        self.bdist_th = 1
+        self.bdist_th = 0.01
 
         self.vx = 0
         self.vy = 0
@@ -137,7 +137,7 @@ class ActionExecutor():
             self.FV = robot_2
             self.BV = robot_1
         self.FV.rfdist = 100
-        self.FV.bdist = float(math.sqrt(math.pow((self.FV.x- self.BV.x), 2) + math.pow((self.BV.y - self.FV.y), 2)))
+        self.FV.bdist =  abs(self.FV.x- self.BV.x) #float(math.sqrt(math.pow((self.FV.x- self.BV.x), 2) + math.pow((self.BV.y - self.FV.y), 2)))
         self.BV.rfdist = self.FV.bdist
         self.BV.bdist = 100
         self.msg.rfdist = robot_1.rfdist
@@ -152,8 +152,8 @@ class ActionExecutor():
         robot2v = robot_2.vx
         self.v = robot1v-robot2v
         self.msg.v_relative = self.v
-        print("Husky 1 vel: "+ str(robot_1.vx))
-        print("Husky 2 vel: "+ str(robot_2.vx))
+        print("Husky 1 vx: "+ str(robot_1.vx))
+        print("Husky 1 vy: "+ str(robot_1.vy))
         print("Relative vel: "+ str(self.v))
 
     def adjust_threshold(self,robot_1,robot_2):
@@ -161,9 +161,11 @@ class ActionExecutor():
         OVERTAKE_TIME = 3
 
         prism_th = PRISM_TIME * self.v
-        overtake_th = OVERTAKE_TIME * robot_1.vx #self.v
+        overtake_th = OVERTAKE_TIME * robot_1.vx #self.v #robot_1.vx * robot_1.vx / robot_2.vx #self.v
         robot_1.rfdist_th = prism_th + overtake_th
-        #print("RF Threshold: "+ str(self.rfdist_th))
+
+        if prism_th < robot_1.bdist_th:
+            robot_1.bdist_th = 1 
         
 
     def check_state(self, robot_1, timestep):
@@ -261,13 +263,14 @@ class ActionExecutor():
                 self.get_policy(husky_1)
                 self.state = 2
             elif self.state == 1:
-                check_request1 = (1 < husky_1.bdist < husky_1.bdist_th+0.3) or (husky_1.rfdist_th-husky_1.vx < husky_1.rfdist < husky_1.rfdist_th) or left_check
+                check_request1 = (0 < husky_1.bdist < husky_1.bdist_th+husky_1.vx/5) or (husky_1.rfdist_th-husky_1.vx < husky_1.rfdist < husky_1.rfdist_th) #or left_check
                 #check_request1 = 80 > husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist_th*self.msg.v_relative-0.1 < husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative
                 #check_request2 =  or (self.policy[len(self.policy)-1] == self.step) or not (self.step in self.policy)
-                #print("Policy bdist: " + str(husky_1.bdist))
-                #print("Policy bdistth: " + str(husky_1.bdist_th*self.msg.v_relative))
-                print("fdist: " + str(husky_1.rfdist))
-                print("fdistth: " + str(husky_1.rfdist_th))
+                print("bdist: " + str(husky_1.bdist))
+                print("bdistth min: " + str(husky_1.bdist_th-husky_1.vx/5))
+                print("bdistth max: " + str(husky_1.bdist_th+husky_1.vx/5))
+                #print("fdist: " + str(husky_1.rfdist))
+                #print("fdistth: " + str(husky_1.rfdist_th))
                 #print("Policy fdistthhh: " + str(husky_1.rfdist_th*self.msg.v_relative))
                 print("\n")
                 if check_request1:
