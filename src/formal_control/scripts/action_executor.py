@@ -252,7 +252,7 @@ class ActionExecutor():
             print("Policy Step: " + str(self.step))
             print("\n")
 
-# States: 0 - Calculate Policy, 1 - Execute Policy, 2 - Wait for order
+            # States: 0 - Calculate Policy, 1 - Execute Policy, 2 - Wait for order
 
             left_array = [9, 10, 11]
             i = self.timestep
@@ -266,7 +266,7 @@ class ActionExecutor():
                 self.get_policy(husky_1)
                 self.state = 2
             elif self.state == 1:
-                check_request1 = (0 < husky_1.bdist < 1.5) or (husky_1.rfdist_th-husky_1.vx < husky_1.rfdist < husky_1.rfdist_th) #or left_check
+                check_request1 = (0 < husky_1.bdist < husky_1.vx) or (husky_1.rfdist_th-husky_1.vx < husky_1.rfdist < husky_1.rfdist_th) #or left_check
                 #check_request1 = 80 > husky_1.bdist > husky_1.bdist_th*self.msg.v_relative or husky_1.rfdist_th*self.msg.v_relative-0.1 < husky_1.rfdist < husky_1.rfdist_th*self.msg.v_relative
                 #check_request2 =  or (self.policy[len(self.policy)-1] == self.step) or not (self.step in self.policy)
                 print("bdist: " + str(husky_1.bdist))
