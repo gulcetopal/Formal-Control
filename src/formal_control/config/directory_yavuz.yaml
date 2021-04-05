@@ -1,4 +1,4 @@
 Directory:
-	path: '/home/yavuz/husky_ws/src/husky/state_mach/path/path.csv'
-	policy: "/home/yavuz/prism/prism/policy_result.txt"
+  path: "/home/yavuz/final_ws/src/path/path.csv"
+  policy: "/home/yavuz/prism/prism/policy_result.txt"
   prism: "/home/yavuz/prism/prism"
