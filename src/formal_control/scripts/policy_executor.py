@@ -7,10 +7,11 @@ from policy_generator import PolicyGenerator
 from prism_talker import PrismTalker
 
 class PolicyExecutor():
-    def __init__(self, rfdist = 0, lfdist = 0, bdist = 0, v = 0, init_state = 0, lane = 1, policy = [] ):
+    def __init__(self, rfdist = 0, lfdist = 0, bdist = 0, v = 0, init_state = 0, lane = 1, policy = [], actions = [] ):
         self.export_dir = rospy.get_param('Directory/policy')
         self.init_state = init_state
         self.policy = policy
+        self.actions = actions
         self.rfdist = rfdist
         self.lfdist = lfdist
         self.bdist = bdist
@@ -31,6 +32,7 @@ class PolicyExecutor():
         generator.export_dir = talker.export_dir
         generator.Parser()
         self.policy = generator.policy
+        self.actions = generator.actions
 
     def main(self):
         self.Policy()
