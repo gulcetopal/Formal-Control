@@ -5,6 +5,7 @@ float32 lfdist
 float32 bdist
 float32 v_relative
 
+int32[] actions
 int32[] policy
 int32[] old_policy
 int32 timestep

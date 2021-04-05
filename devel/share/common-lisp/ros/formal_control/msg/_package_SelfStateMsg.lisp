@@ -9,6 +9,8 @@
           BDIST
           V_RELATIVE-VAL
           V_RELATIVE
+          ACTIONS-VAL
+          ACTIONS
           POLICY-VAL
           POLICY
           OLD_POLICY-VAL

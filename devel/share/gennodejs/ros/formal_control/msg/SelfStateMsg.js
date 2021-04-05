@@ -24,6 +24,7 @@ class SelfStateMsg {
       this.lfdist = null;
       this.bdist = null;
       this.v_relative = null;
+      this.actions = null;
       this.policy = null;
       this.old_policy = null;
       this.timestep = null;
@@ -61,6 +62,12 @@ class SelfStateMsg {
       }
       else {
         this.v_relative = 0.0;
+      }
+      if (initObj.hasOwnProperty('actions')) {
+        this.actions = initObj.actions
+      }
+      else {
+        this.actions = [];
       }
       if (initObj.hasOwnProperty('policy')) {
         this.policy = initObj.policy
@@ -113,6 +120,8 @@ class SelfStateMsg {
     bufferOffset = _serializer.float32(obj.bdist, buffer, bufferOffset);
     // Serialize message field [v_relative]
     bufferOffset = _serializer.float32(obj.v_relative, buffer, bufferOffset);
+    // Serialize message field [actions]
+    bufferOffset = _arraySerializer.int32(obj.actions, buffer, bufferOffset, null);
     // Serialize message field [policy]
     bufferOffset = _arraySerializer.int32(obj.policy, buffer, bufferOffset, null);
     // Serialize message field [old_policy]
@@ -142,6 +151,8 @@ class SelfStateMsg {
     data.bdist = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [v_relative]
     data.v_relative = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [actions]
+    data.actions = _arrayDeserializer.int32(buffer, bufferOffset, null)
     // Deserialize message field [policy]
     data.policy = _arrayDeserializer.int32(buffer, bufferOffset, null)
     // Deserialize message field [old_policy]
@@ -160,9 +171,10 @@ class SelfStateMsg {
   static getMessageSize(object) {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
+    length += 4 * object.actions.length;
     length += 4 * object.policy.length;
     length += 4 * object.old_policy.length;
-    return length + 37;
+    return length + 41;
   }
 
   static datatype() {
@@ -172,7 +184,7 @@ class SelfStateMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'bd52163242caa5ce9ef7b6ebfe345330';
+    return 'a8945206644fb2fbf7de854487cab7b2';
   }
 
   static messageDefinition() {
@@ -185,6 +197,7 @@ class SelfStateMsg {
     float32 bdist
     float32 v_relative
     
+    int32[] actions
     int32[] policy
     int32[] old_policy
     int32 timestep
@@ -257,6 +270,13 @@ class SelfStateMsg {
     }
     else {
       resolved.v_relative = 0.0
+    }
+
+    if (msg.actions !== undefined) {
+      resolved.actions = msg.actions;
+    }
+    else {
+      resolved.actions = []
     }
 
     if (msg.policy !== undefined) {

@@ -30,6 +30,7 @@ struct SelfStateMsg_
     , lfdist(0.0)
     , bdist(0.0)
     , v_relative(0.0)
+    , actions()
     , policy()
     , old_policy()
     , timestep(0)
@@ -43,6 +44,7 @@ struct SelfStateMsg_
     , lfdist(0.0)
     , bdist(0.0)
     , v_relative(0.0)
+    , actions(_alloc)
     , policy(_alloc)
     , old_policy(_alloc)
     , timestep(0)
@@ -68,6 +70,9 @@ struct SelfStateMsg_
 
    typedef float _v_relative_type;
   _v_relative_type v_relative;
+
+   typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _actions_type;
+  _actions_type actions;
 
    typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _policy_type;
   _policy_type policy;
@@ -165,12 +170,12 @@ struct MD5Sum< ::formal_control::SelfStateMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "bd52163242caa5ce9ef7b6ebfe345330";
+    return "a8945206644fb2fbf7de854487cab7b2";
   }
 
   static const char* value(const ::formal_control::SelfStateMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xbd52163242caa5ceULL;
-  static const uint64_t static_value2 = 0x9ef7b6ebfe345330ULL;
+  static const uint64_t static_value1 = 0xa8945206644fb2fbULL;
+  static const uint64_t static_value2 = 0xf7de854487cab7b2ULL;
 };
 
 template<class ContainerAllocator>
@@ -196,6 +201,7 @@ float32 lfdist\n\
 float32 bdist\n\
 float32 v_relative\n\
 \n\
+int32[] actions\n\
 int32[] policy\n\
 int32[] old_policy\n\
 int32 timestep\n\
@@ -248,6 +254,7 @@ namespace serialization
       stream.next(m.lfdist);
       stream.next(m.bdist);
       stream.next(m.v_relative);
+      stream.next(m.actions);
       stream.next(m.policy);
       stream.next(m.old_policy);
       stream.next(m.timestep);
@@ -283,6 +290,12 @@ struct Printer< ::formal_control::SelfStateMsg_<ContainerAllocator> >
     Printer<float>::stream(s, indent + "  ", v.bdist);
     s << indent << "v_relative: ";
     Printer<float>::stream(s, indent + "  ", v.v_relative);
+    s << indent << "actions[]" << std::endl;
+    for (size_t i = 0; i < v.actions.size(); ++i)
+    {
+      s << indent << "  actions[" << i << "]: ";
+      Printer<int32_t>::stream(s, indent + "  ", v.actions[i]);
+    }
     s << indent << "policy[]" << std::endl;
     for (size_t i = 0; i < v.policy.size(); ++i)
     {

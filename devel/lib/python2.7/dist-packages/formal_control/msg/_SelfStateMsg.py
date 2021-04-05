@@ -8,7 +8,7 @@ import struct
 import std_msgs.msg
 
 class SelfStateMsg(genpy.Message):
-  _md5sum = "bd52163242caa5ce9ef7b6ebfe345330"
+  _md5sum = "a8945206644fb2fbf7de854487cab7b2"
   _type = "formal_control/SelfStateMsg"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """std_msgs/Header header
@@ -18,6 +18,7 @@ float32 lfdist
 float32 bdist
 float32 v_relative
 
+int32[] actions
 int32[] policy
 int32[] old_policy
 int32 timestep
@@ -48,8 +49,8 @@ time stamp
 # 1: global frame
 string frame_id
 """
-  __slots__ = ['header','rfdist','lfdist','bdist','v_relative','policy','old_policy','timestep','v_refx','yaw_ref','got_new_plan']
-  _slot_types = ['std_msgs/Header','float32','float32','float32','float32','int32[]','int32[]','int32','float32','float32','bool']
+  __slots__ = ['header','rfdist','lfdist','bdist','v_relative','actions','policy','old_policy','timestep','v_refx','yaw_ref','got_new_plan']
+  _slot_types = ['std_msgs/Header','float32','float32','float32','float32','int32[]','int32[]','int32[]','int32','float32','float32','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -59,7 +60,7 @@ string frame_id
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,rfdist,lfdist,bdist,v_relative,policy,old_policy,timestep,v_refx,yaw_ref,got_new_plan
+       header,rfdist,lfdist,bdist,v_relative,actions,policy,old_policy,timestep,v_refx,yaw_ref,got_new_plan
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -78,6 +79,8 @@ string frame_id
         self.bdist = 0.
       if self.v_relative is None:
         self.v_relative = 0.
+      if self.actions is None:
+        self.actions = []
       if self.policy is None:
         self.policy = []
       if self.old_policy is None:
@@ -96,6 +99,7 @@ string frame_id
       self.lfdist = 0.
       self.bdist = 0.
       self.v_relative = 0.
+      self.actions = []
       self.policy = []
       self.old_policy = []
       self.timestep = 0
@@ -125,6 +129,10 @@ string frame_id
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_get_struct_4f().pack(_x.rfdist, _x.lfdist, _x.bdist, _x.v_relative))
+      length = len(self.actions)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(struct.pack(pattern, *self.actions))
       length = len(self.policy)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -170,6 +178,13 @@ string frame_id
       pattern = '<%si'%length
       start = end
       end += struct.calcsize(pattern)
+      self.actions = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
       self.policy = struct.unpack(pattern, str[start:end])
       start = end
       end += 4
@@ -205,6 +220,10 @@ string frame_id
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_get_struct_4f().pack(_x.rfdist, _x.lfdist, _x.bdist, _x.v_relative))
+      length = len(self.actions)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(self.actions.tostring())
       length = len(self.policy)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -245,6 +264,13 @@ string frame_id
       start = end
       end += 16
       (_x.rfdist, _x.lfdist, _x.bdist, _x.v_relative,) = _get_struct_4f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.actions = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=length)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
