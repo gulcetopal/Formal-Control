@@ -6,5 +6,6 @@
     <rosparam command="load" file="$(find formal_control)/config/directory_gulce.yaml" />
     <rosparam command="load" file="$(find formal_control)/config/prism.yaml" />
 
-    <node name="action_executor" pkg="formal_control" type="action_executor.py" output="$(arg logoutput)"/>
+    <!-- action_executor versiyonu değiştirilmeli -->
+    <node name="action_executor" pkg="formal_control" type="action_executor_v1.py" output="$(arg logoutput)"/>
 </launch>

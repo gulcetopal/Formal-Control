@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="logoutput" default="screen"/>
+
+    <!-- path_generator versiyonu değiştirilmeli -->
+    <node name="path_generator" pkg="formal_control" type="path_generator_v1.py" output="$(arg logoutput)"/>
+</launch>
