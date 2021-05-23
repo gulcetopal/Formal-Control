@@ -15,12 +15,22 @@
           POLICY
           OLD_POLICY-VAL
           OLD_POLICY
-          TIMESTEP-VAL
-          TIMESTEP
-          V_REFX-VAL
-          V_REFX
+          V_EMG-VAL
+          V_EMG
           YAW_REF-VAL
           YAW_REF
           GOT_NEW_PLAN-VAL
           GOT_NEW_PLAN
+          EMERGENCY-VAL
+          EMERGENCY
+          CRIT_CHECK-VAL
+          CRIT_CHECK
+          CURRENT_STATE-VAL
+          CURRENT_STATE
+          LANE-VAL
+          LANE
+          TIMESTEP-VAL
+          TIMESTEP
+          REQUEST-VAL
+          REQUEST
 ))

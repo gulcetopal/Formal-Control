@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 
 <launch>
-    <arg name="logoutput" default="screen"/>
+    <!--arg name="logoutput" default="log"/-->
 
     <rosparam command="load" file="$(find formal_control)/config/directory_gulce.yaml" />
     <rosparam command="load" file="$(find formal_control)/config/prism.yaml" />
 
     <!-- action_executor versiyonu değiştirilmeli -->
-    <node name="action_executor" pkg="formal_control" type="action_executor_v1.py" output="$(arg logoutput)"/>
+    <node name="action_executor" pkg="formal_control" type="action_executor_v2.py" output="screen"/>
+    <node name="prism_policy" pkg="formal_control" type="prism_policy.py" output="log"/>
+
 </launch>

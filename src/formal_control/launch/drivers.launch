@@ -4,7 +4,7 @@
     <arg name="logoutput" default="screen"/>
 
     <!-- main_driverda kullanılan py dosyası versiyonu değiştirilmeli -->
-    <node name="main_driver" pkg="formal_control" type="driver_v1.py" output="$(arg logoutput)"/>
+    <node name="main_driver" pkg="formal_control" type="driver_v2.py" output="$(arg logoutput)"/>
     <node name="environmental_driver" pkg="formal_control" type="multi_cars.py" output="$(arg logoutput)"/>
 
 </launch>

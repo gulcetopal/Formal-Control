@@ -33,10 +33,15 @@ struct SelfStateMsg_
     , actions()
     , policy()
     , old_policy()
-    , timestep(0)
-    , v_refx(0.0)
+    , v_emg(0.0)
     , yaw_ref(0.0)
-    , got_new_plan(false)  {
+    , got_new_plan(false)
+    , emergency(0)
+    , crit_check()
+    , current_state(0)
+    , lane(0)
+    , timestep(0)
+    , request(false)  {
     }
   SelfStateMsg_(const ContainerAllocator& _alloc)
     : header(_alloc)
@@ -47,10 +52,15 @@ struct SelfStateMsg_
     , actions(_alloc)
     , policy(_alloc)
     , old_policy(_alloc)
-    , timestep(0)
-    , v_refx(0.0)
+    , v_emg(0.0)
     , yaw_ref(0.0)
-    , got_new_plan(false)  {
+    , got_new_plan(false)
+    , emergency(0)
+    , crit_check(_alloc)
+    , current_state(0)
+    , lane(0)
+    , timestep(0)
+    , request(false)  {
   (void)_alloc;
     }
 
@@ -80,17 +90,32 @@ struct SelfStateMsg_
    typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _old_policy_type;
   _old_policy_type old_policy;
 
-   typedef int32_t _timestep_type;
-  _timestep_type timestep;
-
-   typedef float _v_refx_type;
-  _v_refx_type v_refx;
+   typedef float _v_emg_type;
+  _v_emg_type v_emg;
 
    typedef float _yaw_ref_type;
   _yaw_ref_type yaw_ref;
 
    typedef uint8_t _got_new_plan_type;
   _got_new_plan_type got_new_plan;
+
+   typedef int32_t _emergency_type;
+  _emergency_type emergency;
+
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _crit_check_type;
+  _crit_check_type crit_check;
+
+   typedef int32_t _current_state_type;
+  _current_state_type current_state;
+
+   typedef int32_t _lane_type;
+  _lane_type lane;
+
+   typedef int32_t _timestep_type;
+  _timestep_type timestep;
+
+   typedef uint8_t _request_type;
+  _request_type request;
 
 
 
@@ -170,12 +195,12 @@ struct MD5Sum< ::formal_control::SelfStateMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "a8945206644fb2fbf7de854487cab7b2";
+    return "e16fb09f7f887b94d9bd0e0a250f07a7";
   }
 
   static const char* value(const ::formal_control::SelfStateMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xa8945206644fb2fbULL;
-  static const uint64_t static_value2 = 0xf7de854487cab7b2ULL;
+  static const uint64_t static_value1 = 0xe16fb09f7f887b94ULL;
+  static const uint64_t static_value2 = 0xd9bd0e0a250f07a7ULL;
 };
 
 template<class ContainerAllocator>
@@ -204,15 +229,18 @@ float32 v_relative\n\
 int32[] actions\n\
 int32[] policy\n\
 int32[] old_policy\n\
-int32 timestep\n\
 \n\
-float32 v_refx\n\
+float32 v_emg\n\
 float32 yaw_ref\n\
 \n\
 bool got_new_plan\n\
 \n\
-\n\
-\n\
+int32 emergency\n\
+string crit_check\n\
+int32 current_state\n\
+int32 lane\n\
+int32 timestep\n\
+bool request\n\
 \n\
 ================================================================================\n\
 MSG: std_msgs/Header\n\
@@ -257,10 +285,15 @@ namespace serialization
       stream.next(m.actions);
       stream.next(m.policy);
       stream.next(m.old_policy);
-      stream.next(m.timestep);
-      stream.next(m.v_refx);
+      stream.next(m.v_emg);
       stream.next(m.yaw_ref);
       stream.next(m.got_new_plan);
+      stream.next(m.emergency);
+      stream.next(m.crit_check);
+      stream.next(m.current_state);
+      stream.next(m.lane);
+      stream.next(m.timestep);
+      stream.next(m.request);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -308,14 +341,24 @@ struct Printer< ::formal_control::SelfStateMsg_<ContainerAllocator> >
       s << indent << "  old_policy[" << i << "]: ";
       Printer<int32_t>::stream(s, indent + "  ", v.old_policy[i]);
     }
-    s << indent << "timestep: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.timestep);
-    s << indent << "v_refx: ";
-    Printer<float>::stream(s, indent + "  ", v.v_refx);
+    s << indent << "v_emg: ";
+    Printer<float>::stream(s, indent + "  ", v.v_emg);
     s << indent << "yaw_ref: ";
     Printer<float>::stream(s, indent + "  ", v.yaw_ref);
     s << indent << "got_new_plan: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.got_new_plan);
+    s << indent << "emergency: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.emergency);
+    s << indent << "crit_check: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.crit_check);
+    s << indent << "current_state: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.current_state);
+    s << indent << "lane: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.lane);
+    s << indent << "timestep: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.timestep);
+    s << indent << "request: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.request);
   }
 };
 

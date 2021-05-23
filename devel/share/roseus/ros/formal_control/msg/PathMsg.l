@@ -22,7 +22,7 @@
   (:init
    (&key
     ((:header __header) (instance std_msgs::Header :init))
-    ((:m __m) (make-array 0 :initial-element 0.0 :element-type :float))
+    ((:m __m) 0.0)
     ((:y_start __y_start) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:y_finish __y_finish) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:x_start __x_start) (make-array 0 :initial-element 0.0 :element-type :float))
@@ -31,7 +31,7 @@
     )
    (send-super :init)
    (setq _header __header)
-   (setq _m __m)
+   (setq _m (float __m))
    (setq _y_start __y_start)
    (setq _y_finish __y_finish)
    (setq _x_start __x_start)
@@ -68,8 +68,8 @@
    (+
     ;; std_msgs/Header _header
     (send _header :serialization-length)
-    ;; float32[] _m
-    (* 4    (length _m)) 4
+    ;; float32 _m
+    4
     ;; float32[] _y_start
     (* 4    (length _y_start)) 4
     ;; float32[] _y_finish
@@ -87,11 +87,8 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; std_msgs/Header _header
        (send _header :serialize s)
-     ;; float32[] _m
-     (write-long (length _m) s)
-     (dotimes (i (length _m))
-       (sys::poke (elt _m i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
-       )
+     ;; float32 _m
+       (sys::poke _m (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32[] _y_start
      (write-long (length _y_start) s)
      (dotimes (i (length _y_start))
@@ -120,13 +117,8 @@
    (buf &optional (ptr- 0))
    ;; std_msgs/Header _header
      (send _header :deserialize buf ptr-) (incf ptr- (send _header :serialization-length))
-   ;; float32[] _m
-   (let (n)
-     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
-     (setq _m (instantiate float-vector n))
-     (dotimes (i n)
-     (setf (elt _m i) (sys::peek buf ptr- :float)) (incf ptr- 4)
-     ))
+   ;; float32 _m
+     (setq _m (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32[] _y_start
    (let (n)
      (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
@@ -161,12 +153,12 @@
    self)
   )
 
-(setf (get formal_control::PathMsg :md5sum-) "aea262bd14c4beff32fb4111e598fc59")
+(setf (get formal_control::PathMsg :md5sum-) "768ebd03b31b8172a50d65a6c3f01ec4")
 (setf (get formal_control::PathMsg :datatype-) "formal_control/PathMsg")
 (setf (get formal_control::PathMsg :definition-)
       "std_msgs/Header header
 
-float32[] m
+float32 m
 float32[] y_start
 float32[] y_finish
 float32[] x_start
@@ -195,6 +187,6 @@ string frame_id
 
 
 
-(provide :formal_control/PathMsg "aea262bd14c4beff32fb4111e598fc59")
+(provide :formal_control/PathMsg "768ebd03b31b8172a50d65a6c3f01ec4")
 
 

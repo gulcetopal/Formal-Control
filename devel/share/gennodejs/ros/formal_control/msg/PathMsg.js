@@ -38,7 +38,7 @@ class PathMsg {
         this.m = initObj.m
       }
       else {
-        this.m = [];
+        this.m = 0.0;
       }
       if (initObj.hasOwnProperty('y_start')) {
         this.y_start = initObj.y_start
@@ -78,7 +78,7 @@ class PathMsg {
     // Serialize message field [header]
     bufferOffset = std_msgs.msg.Header.serialize(obj.header, buffer, bufferOffset);
     // Serialize message field [m]
-    bufferOffset = _arraySerializer.float32(obj.m, buffer, bufferOffset, null);
+    bufferOffset = _serializer.float32(obj.m, buffer, bufferOffset);
     // Serialize message field [y_start]
     bufferOffset = _arraySerializer.float32(obj.y_start, buffer, bufferOffset, null);
     // Serialize message field [y_finish]
@@ -99,7 +99,7 @@ class PathMsg {
     // Deserialize message field [header]
     data.header = std_msgs.msg.Header.deserialize(buffer, bufferOffset);
     // Deserialize message field [m]
-    data.m = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    data.m = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [y_start]
     data.y_start = _arrayDeserializer.float32(buffer, bufferOffset, null)
     // Deserialize message field [y_finish]
@@ -116,7 +116,6 @@ class PathMsg {
   static getMessageSize(object) {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
-    length += 4 * object.m.length;
     length += 4 * object.y_start.length;
     length += 4 * object.y_finish.length;
     length += 4 * object.x_start.length;
@@ -131,7 +130,7 @@ class PathMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'aea262bd14c4beff32fb4111e598fc59';
+    return '768ebd03b31b8172a50d65a6c3f01ec4';
   }
 
   static messageDefinition() {
@@ -139,7 +138,7 @@ class PathMsg {
     return `
     std_msgs/Header header
     
-    float32[] m
+    float32 m
     float32[] y_start
     float32[] y_finish
     float32[] x_start
@@ -184,7 +183,7 @@ class PathMsg {
       resolved.m = msg.m;
     }
     else {
-      resolved.m = []
+      resolved.m = 0.0
     }
 
     if (msg.y_start !== undefined) {

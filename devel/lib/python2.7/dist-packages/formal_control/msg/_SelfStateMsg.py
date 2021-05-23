@@ -8,7 +8,7 @@ import struct
 import std_msgs.msg
 
 class SelfStateMsg(genpy.Message):
-  _md5sum = "a8945206644fb2fbf7de854487cab7b2"
+  _md5sum = "e16fb09f7f887b94d9bd0e0a250f07a7"
   _type = "formal_control/SelfStateMsg"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """std_msgs/Header header
@@ -21,15 +21,18 @@ float32 v_relative
 int32[] actions
 int32[] policy
 int32[] old_policy
-int32 timestep
 
-float32 v_refx
+float32 v_emg
 float32 yaw_ref
 
 bool got_new_plan
 
-
-
+int32 emergency
+string crit_check
+int32 current_state
+int32 lane
+int32 timestep
+bool request
 
 ================================================================================
 MSG: std_msgs/Header
@@ -49,8 +52,8 @@ time stamp
 # 1: global frame
 string frame_id
 """
-  __slots__ = ['header','rfdist','lfdist','bdist','v_relative','actions','policy','old_policy','timestep','v_refx','yaw_ref','got_new_plan']
-  _slot_types = ['std_msgs/Header','float32','float32','float32','float32','int32[]','int32[]','int32[]','int32','float32','float32','bool']
+  __slots__ = ['header','rfdist','lfdist','bdist','v_relative','actions','policy','old_policy','v_emg','yaw_ref','got_new_plan','emergency','crit_check','current_state','lane','timestep','request']
+  _slot_types = ['std_msgs/Header','float32','float32','float32','float32','int32[]','int32[]','int32[]','float32','float32','bool','int32','string','int32','int32','int32','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -60,7 +63,7 @@ string frame_id
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,rfdist,lfdist,bdist,v_relative,actions,policy,old_policy,timestep,v_refx,yaw_ref,got_new_plan
+       header,rfdist,lfdist,bdist,v_relative,actions,policy,old_policy,v_emg,yaw_ref,got_new_plan,emergency,crit_check,current_state,lane,timestep,request
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -85,14 +88,24 @@ string frame_id
         self.policy = []
       if self.old_policy is None:
         self.old_policy = []
-      if self.timestep is None:
-        self.timestep = 0
-      if self.v_refx is None:
-        self.v_refx = 0.
+      if self.v_emg is None:
+        self.v_emg = 0.
       if self.yaw_ref is None:
         self.yaw_ref = 0.
       if self.got_new_plan is None:
         self.got_new_plan = False
+      if self.emergency is None:
+        self.emergency = 0
+      if self.crit_check is None:
+        self.crit_check = ''
+      if self.current_state is None:
+        self.current_state = 0
+      if self.lane is None:
+        self.lane = 0
+      if self.timestep is None:
+        self.timestep = 0
+      if self.request is None:
+        self.request = False
     else:
       self.header = std_msgs.msg.Header()
       self.rfdist = 0.
@@ -102,10 +115,15 @@ string frame_id
       self.actions = []
       self.policy = []
       self.old_policy = []
-      self.timestep = 0
-      self.v_refx = 0.
+      self.v_emg = 0.
       self.yaw_ref = 0.
       self.got_new_plan = False
+      self.emergency = 0
+      self.crit_check = ''
+      self.current_state = 0
+      self.lane = 0
+      self.timestep = 0
+      self.request = False
 
   def _get_types(self):
     """
@@ -142,7 +160,15 @@ string frame_id
       pattern = '<%si'%length
       buff.write(struct.pack(pattern, *self.old_policy))
       _x = self
-      buff.write(_get_struct_i2fB().pack(_x.timestep, _x.v_refx, _x.yaw_ref, _x.got_new_plan))
+      buff.write(_get_struct_2fBi().pack(_x.v_emg, _x.yaw_ref, _x.got_new_plan, _x.emergency))
+      _x = self.crit_check
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_get_struct_3iB().pack(_x.current_state, _x.lane, _x.timestep, _x.request))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -196,8 +222,22 @@ string frame_id
       _x = self
       start = end
       end += 13
-      (_x.timestep, _x.v_refx, _x.yaw_ref, _x.got_new_plan,) = _get_struct_i2fB().unpack(str[start:end])
+      (_x.v_emg, _x.yaw_ref, _x.got_new_plan, _x.emergency,) = _get_struct_2fBi().unpack(str[start:end])
       self.got_new_plan = bool(self.got_new_plan)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.crit_check = str[start:end].decode('utf-8')
+      else:
+        self.crit_check = str[start:end]
+      _x = self
+      start = end
+      end += 13
+      (_x.current_state, _x.lane, _x.timestep, _x.request,) = _get_struct_3iB().unpack(str[start:end])
+      self.request = bool(self.request)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -233,7 +273,15 @@ string frame_id
       pattern = '<%si'%length
       buff.write(self.old_policy.tostring())
       _x = self
-      buff.write(_get_struct_i2fB().pack(_x.timestep, _x.v_refx, _x.yaw_ref, _x.got_new_plan))
+      buff.write(_get_struct_2fBi().pack(_x.v_emg, _x.yaw_ref, _x.got_new_plan, _x.emergency))
+      _x = self.crit_check
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_get_struct_3iB().pack(_x.current_state, _x.lane, _x.timestep, _x.request))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -288,8 +336,22 @@ string frame_id
       _x = self
       start = end
       end += 13
-      (_x.timestep, _x.v_refx, _x.yaw_ref, _x.got_new_plan,) = _get_struct_i2fB().unpack(str[start:end])
+      (_x.v_emg, _x.yaw_ref, _x.got_new_plan, _x.emergency,) = _get_struct_2fBi().unpack(str[start:end])
       self.got_new_plan = bool(self.got_new_plan)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.crit_check = str[start:end].decode('utf-8')
+      else:
+        self.crit_check = str[start:end]
+      _x = self
+      start = end
+      end += 13
+      (_x.current_state, _x.lane, _x.timestep, _x.request,) = _get_struct_3iB().unpack(str[start:end])
+      self.request = bool(self.request)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -304,15 +366,21 @@ def _get_struct_4f():
     if _struct_4f is None:
         _struct_4f = struct.Struct("<4f")
     return _struct_4f
-_struct_i2fB = None
-def _get_struct_i2fB():
-    global _struct_i2fB
-    if _struct_i2fB is None:
-        _struct_i2fB = struct.Struct("<i2fB")
-    return _struct_i2fB
+_struct_3iB = None
+def _get_struct_3iB():
+    global _struct_3iB
+    if _struct_3iB is None:
+        _struct_3iB = struct.Struct("<3iB")
+    return _struct_3iB
 _struct_3I = None
 def _get_struct_3I():
     global _struct_3I
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
+_struct_2fBi = None
+def _get_struct_2fBi():
+    global _struct_2fBi
+    if _struct_2fBi is None:
+        _struct_2fBi = struct.Struct("<2fBi")
+    return _struct_2fBi

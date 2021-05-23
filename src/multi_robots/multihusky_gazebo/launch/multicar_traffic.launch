@@ -72,7 +72,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <group ns="h3">
     <include file="$(find multihusky_gazebo)/launch/spawn_multihusky.launch">
       <arg name="robot_namespace" value="h3" />
-      <arg name="x" value="30.0" />
+      <arg name="x" value="40.0" />  <!--30 -->
       <arg name="y" value="-1.45" /> 
       <arg name="yaw" value="-3.14" />
       <arg name="laser_enabled" value="$(arg laser_enabled)"/>

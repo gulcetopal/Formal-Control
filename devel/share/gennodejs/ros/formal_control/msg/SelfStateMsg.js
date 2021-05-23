@@ -27,10 +27,15 @@ class SelfStateMsg {
       this.actions = null;
       this.policy = null;
       this.old_policy = null;
-      this.timestep = null;
-      this.v_refx = null;
+      this.v_emg = null;
       this.yaw_ref = null;
       this.got_new_plan = null;
+      this.emergency = null;
+      this.crit_check = null;
+      this.current_state = null;
+      this.lane = null;
+      this.timestep = null;
+      this.request = null;
     }
     else {
       if (initObj.hasOwnProperty('header')) {
@@ -81,17 +86,11 @@ class SelfStateMsg {
       else {
         this.old_policy = [];
       }
-      if (initObj.hasOwnProperty('timestep')) {
-        this.timestep = initObj.timestep
+      if (initObj.hasOwnProperty('v_emg')) {
+        this.v_emg = initObj.v_emg
       }
       else {
-        this.timestep = 0;
-      }
-      if (initObj.hasOwnProperty('v_refx')) {
-        this.v_refx = initObj.v_refx
-      }
-      else {
-        this.v_refx = 0.0;
+        this.v_emg = 0.0;
       }
       if (initObj.hasOwnProperty('yaw_ref')) {
         this.yaw_ref = initObj.yaw_ref
@@ -104,6 +103,42 @@ class SelfStateMsg {
       }
       else {
         this.got_new_plan = false;
+      }
+      if (initObj.hasOwnProperty('emergency')) {
+        this.emergency = initObj.emergency
+      }
+      else {
+        this.emergency = 0;
+      }
+      if (initObj.hasOwnProperty('crit_check')) {
+        this.crit_check = initObj.crit_check
+      }
+      else {
+        this.crit_check = '';
+      }
+      if (initObj.hasOwnProperty('current_state')) {
+        this.current_state = initObj.current_state
+      }
+      else {
+        this.current_state = 0;
+      }
+      if (initObj.hasOwnProperty('lane')) {
+        this.lane = initObj.lane
+      }
+      else {
+        this.lane = 0;
+      }
+      if (initObj.hasOwnProperty('timestep')) {
+        this.timestep = initObj.timestep
+      }
+      else {
+        this.timestep = 0;
+      }
+      if (initObj.hasOwnProperty('request')) {
+        this.request = initObj.request
+      }
+      else {
+        this.request = false;
       }
     }
   }
@@ -126,14 +161,24 @@ class SelfStateMsg {
     bufferOffset = _arraySerializer.int32(obj.policy, buffer, bufferOffset, null);
     // Serialize message field [old_policy]
     bufferOffset = _arraySerializer.int32(obj.old_policy, buffer, bufferOffset, null);
-    // Serialize message field [timestep]
-    bufferOffset = _serializer.int32(obj.timestep, buffer, bufferOffset);
-    // Serialize message field [v_refx]
-    bufferOffset = _serializer.float32(obj.v_refx, buffer, bufferOffset);
+    // Serialize message field [v_emg]
+    bufferOffset = _serializer.float32(obj.v_emg, buffer, bufferOffset);
     // Serialize message field [yaw_ref]
     bufferOffset = _serializer.float32(obj.yaw_ref, buffer, bufferOffset);
     // Serialize message field [got_new_plan]
     bufferOffset = _serializer.bool(obj.got_new_plan, buffer, bufferOffset);
+    // Serialize message field [emergency]
+    bufferOffset = _serializer.int32(obj.emergency, buffer, bufferOffset);
+    // Serialize message field [crit_check]
+    bufferOffset = _serializer.string(obj.crit_check, buffer, bufferOffset);
+    // Serialize message field [current_state]
+    bufferOffset = _serializer.int32(obj.current_state, buffer, bufferOffset);
+    // Serialize message field [lane]
+    bufferOffset = _serializer.int32(obj.lane, buffer, bufferOffset);
+    // Serialize message field [timestep]
+    bufferOffset = _serializer.int32(obj.timestep, buffer, bufferOffset);
+    // Serialize message field [request]
+    bufferOffset = _serializer.bool(obj.request, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -157,14 +202,24 @@ class SelfStateMsg {
     data.policy = _arrayDeserializer.int32(buffer, bufferOffset, null)
     // Deserialize message field [old_policy]
     data.old_policy = _arrayDeserializer.int32(buffer, bufferOffset, null)
-    // Deserialize message field [timestep]
-    data.timestep = _deserializer.int32(buffer, bufferOffset);
-    // Deserialize message field [v_refx]
-    data.v_refx = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [v_emg]
+    data.v_emg = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [yaw_ref]
     data.yaw_ref = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [got_new_plan]
     data.got_new_plan = _deserializer.bool(buffer, bufferOffset);
+    // Deserialize message field [emergency]
+    data.emergency = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [crit_check]
+    data.crit_check = _deserializer.string(buffer, bufferOffset);
+    // Deserialize message field [current_state]
+    data.current_state = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [lane]
+    data.lane = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [timestep]
+    data.timestep = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [request]
+    data.request = _deserializer.bool(buffer, bufferOffset);
     return data;
   }
 
@@ -174,7 +229,8 @@ class SelfStateMsg {
     length += 4 * object.actions.length;
     length += 4 * object.policy.length;
     length += 4 * object.old_policy.length;
-    return length + 41;
+    length += object.crit_check.length;
+    return length + 58;
   }
 
   static datatype() {
@@ -184,7 +240,7 @@ class SelfStateMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'a8945206644fb2fbf7de854487cab7b2';
+    return 'e16fb09f7f887b94d9bd0e0a250f07a7';
   }
 
   static messageDefinition() {
@@ -200,15 +256,18 @@ class SelfStateMsg {
     int32[] actions
     int32[] policy
     int32[] old_policy
-    int32 timestep
     
-    float32 v_refx
+    float32 v_emg
     float32 yaw_ref
     
     bool got_new_plan
     
-    
-    
+    int32 emergency
+    string crit_check
+    int32 current_state
+    int32 lane
+    int32 timestep
+    bool request
     
     ================================================================================
     MSG: std_msgs/Header
@@ -293,18 +352,11 @@ class SelfStateMsg {
       resolved.old_policy = []
     }
 
-    if (msg.timestep !== undefined) {
-      resolved.timestep = msg.timestep;
+    if (msg.v_emg !== undefined) {
+      resolved.v_emg = msg.v_emg;
     }
     else {
-      resolved.timestep = 0
-    }
-
-    if (msg.v_refx !== undefined) {
-      resolved.v_refx = msg.v_refx;
-    }
-    else {
-      resolved.v_refx = 0.0
+      resolved.v_emg = 0.0
     }
 
     if (msg.yaw_ref !== undefined) {
@@ -319,6 +371,48 @@ class SelfStateMsg {
     }
     else {
       resolved.got_new_plan = false
+    }
+
+    if (msg.emergency !== undefined) {
+      resolved.emergency = msg.emergency;
+    }
+    else {
+      resolved.emergency = 0
+    }
+
+    if (msg.crit_check !== undefined) {
+      resolved.crit_check = msg.crit_check;
+    }
+    else {
+      resolved.crit_check = ''
+    }
+
+    if (msg.current_state !== undefined) {
+      resolved.current_state = msg.current_state;
+    }
+    else {
+      resolved.current_state = 0
+    }
+
+    if (msg.lane !== undefined) {
+      resolved.lane = msg.lane;
+    }
+    else {
+      resolved.lane = 0
+    }
+
+    if (msg.timestep !== undefined) {
+      resolved.timestep = msg.timestep;
+    }
+    else {
+      resolved.timestep = 0
+    }
+
+    if (msg.request !== undefined) {
+      resolved.request = msg.request;
+    }
+    else {
+      resolved.request = false
     }
 
     return resolved;

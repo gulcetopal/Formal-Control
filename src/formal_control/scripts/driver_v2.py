@@ -61,21 +61,24 @@ class pure_pursuit:
     	self.goal_pub = rospy.Publisher('/waypoint/goal', Point, queue_size=1)
         self.twist_pub = rospy.Publisher("/h1/husky_velocity_controller/cmd_vel", Twist, queue_size = 50)
         self.h2_pub = rospy.Publisher("/h2/husky_velocity_controller/cmd_vel", Twist, queue_size = 50)
-        self.timestep_pub = rospy.Publisher("/traffic_robot_state", SelfStateMsg, queue_size = 50)
+        self.lane_pub = rospy.Publisher("/traffic_robot_state", SelfStateMsg, queue_size = 50)
 
     def PathCallback(self,data):
+        #print("Path Callback!")
         self.path_data = data.x_start
+        self.velocity = data.m
+        self.VELOCITY = self.velocity
+        self.LOOKAHEAD_DISTANCE = 1 * self.velocity # meters
 
     def StateCallback(self,data):
         self.latest_state_data = data
 
     def TrafficCallback(self,data):
         self.policy = data.policy
-
         if self.old_policy != self.policy:
             self.got_new_plan = True
             self.old_policy = self.policy
-            print("New Policy Calculated !")
+            #print("New Policy Calculated !")
 
     def read_waypoints(self):
         self.path_points_x = []
@@ -135,10 +138,10 @@ class pure_pursuit:
         print("\n")
         print("X: " + str(x))
         print("X Goal = " + str(self.path_points_x[goal]))
-        print("\n")
         print("Y: " + str(y))
         print("Y Goal = " + str(self.path_points_y[goal]))
         print("\n")
+
         gvcx = self.path_points_x[goal] - x
         gvcy = self.path_points_y[goal] - y
         goal_x_veh_coord = gvcx*np.cos(yaw) + gvcy*np.sin(yaw)
@@ -157,23 +160,23 @@ class pure_pursuit:
         angle = angle_i*2
         #angle = np.clip(angle, -0.4189, 0.4189) # 0.4189 radians = 24 degrees because car can only turn 24 degrees max
 
-        left_mid_th = 0.3
-        right_mid_th = 0.3
+        left_mid_th = 0.3225
+        right_mid_th = 0.3225
         stp = 0.1
 
         if abs(y + 2.745) < right_mid_th or y < -2.9:
-            self.ts_msg.timestep = 3
+            self.ts_msg.timestep = 1
             print("Current Lane: Right")
         elif abs(y + 2.1) < right_mid_th:
-            self.ts_msg.timestep = 6
+            self.ts_msg.timestep = 9
             print("Current Lane: Mid")
         elif abs(y + 1.45) < right_mid_th or y > -1.2:
-            self.ts_msg.timestep = 9
+            self.ts_msg.timestep = 17
             print("Current Lane: Left")
         else:
             print("Current Lane: -")
             self.ts_msg.got_new_plan = self.got_new_plan
-        self.timestep_pub.publish(self.ts_msg)
+        self.lane_pub.publish(self.ts_msg)
 
 
         #self.set_speed(angle)
@@ -190,6 +193,7 @@ class pure_pursuit:
        # print("*******")
 
     def send_command(self):
+        print("Velocity = " + str(self.velocity))
         self.msg.linear.x = self.velocity
         self.msg.linear.y = 0
         self.msg.angular.z = self.angularz
@@ -222,7 +226,7 @@ class pure_pursuit:
     def const_speed(self,angle):
         self.LOOKAHEAD_DISTANCE = 2
         self.angle = angle
-        self.velocity = self.VELOCITY
+        #self.velocity = self.VELOCITY
 
     def find_angle(self, v1, v2):
         cosang = np.dot(v1, v2)

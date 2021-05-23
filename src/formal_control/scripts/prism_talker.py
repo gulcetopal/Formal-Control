@@ -42,10 +42,10 @@ class PrismTalker():
 
         os.system("cd " + self.dir)
         os.chdir(self.dir)
-        os.system("bin/prism " + self.model +" "+ self.spec + " -const "+ cmd + " -simpath 8"+" "+self.export_dir)
+        os.system("bin/prism " + self.model +" "+ self.spec + " -const "+ cmd + " -simpath 5"+" "+self.export_dir)
         print("\n")
         rospy.loginfo("Behavioural plan calculated!")
-        print("\n") 
+        print("\n")
 
     def main(self):
         rate = rospy.Rate(10)

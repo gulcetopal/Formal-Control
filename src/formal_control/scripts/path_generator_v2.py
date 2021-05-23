@@ -25,18 +25,24 @@ class PathGenerator():
         self.latest_state_data = ModelStates()
         self.traj = []
         self.policy = []
+        self.actions = []
+        self.msg = PathMsg()
 
         self.path_dir = rospy.get_param('Directory/path')
         #self.policy = [0,0,0,0]
-        #self.policy = [0,0,0,0,1,1,1,2,3,3,3,3,3,3,3,3,3,3,3,3]
+        #self.policy = [0,0,0,0,1,1,1,2,3,3,3,3,3,3,3,3,3,3,0,0,0,0,1,1,1,2,3,3,3,3,3,3,3,3,3,3,0,0,0,0,1,1,1,2,3]
         #self.policy = [3,3,3,8,11,11,11,6,0,0,0]
         #self.policy = [11,11,11,11,11,11]
+        self.emergency = 0
 
         self.v_relative = 0
+        self.velocity_ref = 1.0
+
         self.old_policy = []
         self.trajm_lines = []
         self.trajys_lines = []
         self.trajyf_lines = []
+
         self.line_step = 10
         self.robot_x = 0
         self.robot_y = 0
@@ -46,24 +52,96 @@ class PathGenerator():
         self.trajy_array = []
         self.path_x = []
         self.path_y = []
+        self.trajx = []
+        self.trajy = []
         self.w = []
         self.got_new_plan = False
         self.policy_check = False
 
+        self.robot_2_vx = 0
+        self.robot_3_vx = 0
+        self.model_name_2 = "Husky_h2"
+        self.model_name_3 = "Husky_h3"
+        self.v_emg_ref = self.velocity_ref
+
         rospy.Subscriber("/traffic_topic", SelfStateMsg, self.policyCallback)
         rospy.Subscriber("/gazebo/model_states", ModelStates, self.StateCallback)
         self.path_pub = rospy.Publisher("/path_data", PathMsg, queue_size = 50)
+        self.timestep_pub = rospy.Publisher("/traffic_timestep", SelfStateMsg, queue_size = 50)
+
+        self.timestep_msg = SelfStateMsg()
 
         self.main()
 
     def StateCallback(self,data):
         self.latest_state_data = data
+        self.robot_2_vx = self.latest_state_data.twist[self.latest_state_data.name.index(self.model_name_2)].linear.x
+        self.robot_3_vx = self.latest_state_data.twist[self.latest_state_data.name.index(self.model_name_3)].linear.x
 
     def policyCallback(self,data):
         self.policy = data.policy
+        self.actions = data.actions
         self.emergency = data.emergency
         self.v_relative = data.v_relative
+        self.v_emg_ref = data.v_emg
         self.got_new_plan = data.got_new_plan
+
+    def velocity_profiler(self):
+        
+        i = 0
+        if self.trajx != []:
+            for k in self.trajx:
+                if self.robot_x < k:
+                    break
+                else:
+                    if len(self.actions) != 0:
+                        if i == len(self.actions)-1:
+                            break
+                        else:
+                            i = i+1
+        else:
+            i = 0
+
+        print("Actions: " + str(self.actions))
+        print("Action Step: " + str(i))   
+
+        ii = 0
+        if self.trajx != []:
+            for k in self.trajx:
+                if self.robot_x < k:
+                    break
+                else:
+                    if ii == len(self.policy)-1:
+                        break
+                    else:
+                        ii = ii+1
+        else:
+            ii = 0
+        timestep = ii
+        self.timestep_msg.timestep = timestep
+
+        if self.emergency != 0:
+            if self.emergency == 1: # EM1 -> Handbrake
+                self.msg.m = 0
+            elif self.emergency == 2: # EM2 -> Pull over to Left
+                self.msg.m = self.velocity_ref*1.5
+            elif self.emergency == 3: # EM3 -> Pull over to right
+                self.msg.m = self.velocity_ref*1.5
+        else:
+            if len(self.actions) == 0:
+                self.msg.m = self.v_emg_ref
+                print("EMG Vel: " + str(self.v_emg_ref))
+            else:
+                if self.actions[i] == 0: # Free Ride
+                    self.msg.m = self.velocity_ref
+                elif self.actions[i] == 1: # Faster
+                    self.msg.m = self.velocity_ref + 0.3
+                elif self.actions[i] == 2: # Slower
+                    self.msg.m = self.robot_2_vx - self.robot_2_vx/15 #- self.robot_2_vx/3   #self.velocity_ref - 0.3
+                elif self.actions[i] == 3: # Sheer in
+                    self.msg.m = self.velocity_ref
+                elif self.actions[i] == 4: # Sheer out
+                    self.msg.m = self.velocity_ref
 
     def emergency_planner(self):
         timestep = 15
@@ -78,23 +156,23 @@ class PathGenerator():
 
         if self.emergency == 1:
             y = self.robot_y
-
         elif self.emergency == 2:
-            y = -1.15
+            y = -0.5
         elif self.emergency == 3:
-            y = -3.045
+            y = -3.5
         else:
             y = self.robot_y
 
         pt.ys = y
         self.trajy.append(pt.ys)
 
-        pt.xs = pt.xs + 0.3
+        pt.xs = x + 0.3
         self.trajx.append(pt.xs)
 
         for i in range(10):
-            pt.xs = pt.xs + 1.5
+            pt.xs = pt.xs + 0.3
             self.trajx.append(pt.xs)
+            self.trajy.append(pt.ys)
 
         line = Point()
         self.trajm_lines = []
@@ -131,6 +209,7 @@ class PathGenerator():
         temp2_y = [self.trajys_lines[0]]
 
         if len(self.trajxs_lines) is not 0:
+            print("EMERGENCY!")
             for i in range(len(self.trajxf_lines)):
                 temp2_x.append(self.trajxf_lines[i])
                 temp2_y.append(self.trajyf_lines[i])
@@ -172,7 +251,7 @@ class PathGenerator():
         if len(self.policy) == 1:
             self.policy = [self.policy[0],self.policy[0]]
 
-        print("Policy: " + str(self.policy))
+        #print("Policy: " + str(self.policy))
 
         for i in self.policy:
             for k in right_array:
@@ -211,7 +290,7 @@ class PathGenerator():
         self.trajx.append(pt.xs)
 
         for i in range(len(self.policy)-1):
-            if (((self.policy[i+1]) == 6) or ((self.policy[i+1]) == 7) or ((self.policy[i+1]) == 8) or mid_check_array[i]):
+            if (mid_check_array[i+1]):
                 pt.xs = pt.xs + 1.5
             else:
                 pt.xs = pt.xs + 1
@@ -303,35 +382,41 @@ class PathGenerator():
 
     def main(self):
         rate = rospy.Rate(5)
-
-        msg = PathMsg()
         old_trajx = []
         counter = 1
+        self.old_policy = self.policy
+
         while not rospy.is_shutdown():
+            print("EMG: " + str(self.emergency))
+            print("\n")
             self.get_params()
             #if self.got_new_plan:
             if self.robot_x == False or self.policy == []:
                 rate.sleep()
                 print("No policy")
             else:
-                if self.policy != self.old_policy:
+                print("Policy:" + str(self.policy))
+                self.velocity_profiler()
+
+                
+                if self.old_policy != self.policy:
                     self.old_policy = self.policy
                     self.policy_check = True
                 else:
                     self.policy_check = False
 
-                if self.policy_check:
-                    if self.emergency == 0:
+
+                if self.emergency == 0:
+                    if self.policy_check:
                         self.w = []
                         print("Policy updated")
                         self.get_params()
                         self.trajectoryPlanner()
                         old_trajx = self.trajx
-                        msg.m = self.trajm_lines
-                        msg.y_start = self.path_y
-                        msg.y_finish = self.trajyf_lines
-                        msg.x_start = self.path_x
-                        msg.x_finish = self.trajxf_lines
+                        self.msg.y_start = self.path_y
+                        self.msg.y_finish = self.trajyf_lines
+                        self.msg.x_start = self.path_x
+                        self.msg.x_finish = self.trajxf_lines
                         self.policy_check = False
                         for i in range(len(self.path_x)-1):
                             if self.path_x[i]-self.path_x[i+1] == 0:
@@ -343,82 +428,41 @@ class PathGenerator():
                         self.w.append(self.w[len(self.w)-1])
                         with open(self.path_dir,"w") as path:
                             path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                            for i in range(len(msg.x_start)):
-                                path_writer.writerow([msg.x_start[i],msg.y_start[i],self.w[i]])
-                    else:
-                        self.w = []
-                        print("EMERGENCY !!***!!")
-                        self.get_params()
-                        self.emergency_planner()
-                        old_trajx = self.trajx
-                        msg.m = self.trajm_lines
-                        msg.y_start = self.path_y
-                        msg.y_finish = self.trajyf_lines
-                        msg.x_start = self.path_x
-                        msg.x_finish = self.trajxf_lines
-                        self.policy_check = False
-                        for i in range(len(self.path_x)-1):
-                            if self.path_x[i]-self.path_x[i+1] == 0:
-                                yaw = 0
-                            else:
-                                yaw = math.atan((self.path_y[i]-self.path_y[i+1])/(self.path_x[i]-self.path_x[i+1]))
+                            for i in range(len(self.msg.x_start)):
+                                path_writer.writerow([self.msg.x_start[i],self.msg.y_start[i],self.w[i]])
+                
 
-                            self.w.append(yaw)
-                        self.w.append(self.w[len(self.w)-1])
-                        with open(self.path_dir,"w") as path:
-                            path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                            for i in range(len(msg.x_start)):
-                                path_writer.writerow([msg.x_start[i],msg.y_start[i],self.w[i]])
-                if counter < 2:
-                    if self.emergency == 0:
-                        self.w = []
-                        self.get_params()
-                        self.trajectoryPlanner()
+                else:
+                    self.w = []
+                    print("EMERGENCY !!***!!")
+                    self.get_params()
+                    self.emergency_planner()
+                    old_trajx = self.trajx
+                    self.msg.y_start = self.path_y
+                    self.msg.y_finish = self.trajyf_lines
+                    self.msg.x_start = self.path_x
+                    self.msg.x_finish = self.trajxf_lines
+                    self.policy_check = False
+                    for i in range(len(self.path_x)-1):
+                        if self.path_x[i]-self.path_x[i+1] == 0:
+                            yaw = 0
+                        else:
+                            yaw = math.atan((self.path_y[i]-self.path_y[i+1])/(self.path_x[i]-self.path_x[i+1]))
 
-                        msg.m = self.trajm_lines
-                        msg.y_start = self.path_y
-                        msg.y_finish = self.trajyf_lines
-                        msg.x_start = self.path_x
-                        msg.x_finish = self.trajxf_lines
-                        self.policy_check = False
-                        for i in range(len(self.path_x)-1):
-                            if self.path_x[i]-self.path_x[i+1] == 0:
-                                yaw = 0
-                            else:
-                                yaw = math.atan((self.path_y[i]-self.path_y[i+1])/(self.path_x[i]-self.path_x[i+1]))
-                            self.w.append(yaw)
-                        self.w.append(self.w[len(self.w)-1])
-                        with open(self.path_dir,"w") as path:
-                            path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                            for i in range(len(msg.x_start)):
-                                path_writer.writerow([msg.x_start[i],msg.y_start[i],self.w[i]])
-                    else:
-                        self.w = []
-                        self.get_params()
-                        print("EMERGENCY !!***!!")
-                        self.emergency_planner()
-                        msg.m = self.trajm_lines
-                        msg.y_start = self.path_y
-                        msg.y_finish = self.trajyf_lines
-                        msg.x_start = self.path_x
-                        msg.x_finish = self.trajxf_lines
-                        self.policy_check = False
-                        for i in range(len(self.path_x)-1):
-                            if self.path_x[i]-self.path_x[i+1] == 0:
-                                yaw = 0
-                            else:
-                                yaw = math.atan((self.path_y[i]-self.path_y[i+1])/(self.path_x[i]-self.path_x[i+1]))
-                            self.w.append(yaw)
-                        self.w.append(self.w[len(self.w)-1])
-                        with open(self.path_dir,"w") as path:
-                            path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                            for i in range(len(msg.x_start)):
-                                path_writer.writerow([msg.x_start[i],msg.y_start[i],self.w[i]])
+                        self.w.append(yaw)
+                    self.w.append(self.w[len(self.w)-1])
+                    with open(self.path_dir,"w") as path:
+                        path_writer = csv.writer(path, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                        for i in range(len(self.msg.x_start)):
+                            path_writer.writerow([self.msg.x_start[i],self.msg.y_start[i],self.w[i]])
+                #if counter < 2:
 
                 #print("Path X: " + str(self.path_x))
                 #print("Path Y: " + str(self.path_y))
-
-                self.path_pub.publish(msg)
+                #print("Trajx: " + str(self.trajx))
+                #print("Trajy: " + str(self.trajy))
+                self.path_pub.publish(self.msg)
+                self.timestep_pub.publish(self.timestep_msg)
                 rate.sleep()
 
                 #if self.policy_check:

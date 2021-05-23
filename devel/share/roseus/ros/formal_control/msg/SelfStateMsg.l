@@ -16,7 +16,7 @@
 
 (defclass formal_control::SelfStateMsg
   :super ros::object
-  :slots (_header _rfdist _lfdist _bdist _v_relative _actions _policy _old_policy _timestep _v_refx _yaw_ref _got_new_plan ))
+  :slots (_header _rfdist _lfdist _bdist _v_relative _actions _policy _old_policy _v_emg _yaw_ref _got_new_plan _emergency _crit_check _current_state _lane _timestep _request ))
 
 (defmethod formal_control::SelfStateMsg
   (:init
@@ -29,10 +29,15 @@
     ((:actions __actions) (make-array 0 :initial-element 0 :element-type :integer))
     ((:policy __policy) (make-array 0 :initial-element 0 :element-type :integer))
     ((:old_policy __old_policy) (make-array 0 :initial-element 0 :element-type :integer))
-    ((:timestep __timestep) 0)
-    ((:v_refx __v_refx) 0.0)
+    ((:v_emg __v_emg) 0.0)
     ((:yaw_ref __yaw_ref) 0.0)
     ((:got_new_plan __got_new_plan) nil)
+    ((:emergency __emergency) 0)
+    ((:crit_check __crit_check) "")
+    ((:current_state __current_state) 0)
+    ((:lane __lane) 0)
+    ((:timestep __timestep) 0)
+    ((:request __request) nil)
     )
    (send-super :init)
    (setq _header __header)
@@ -43,10 +48,15 @@
    (setq _actions __actions)
    (setq _policy __policy)
    (setq _old_policy __old_policy)
-   (setq _timestep (round __timestep))
-   (setq _v_refx (float __v_refx))
+   (setq _v_emg (float __v_emg))
    (setq _yaw_ref (float __yaw_ref))
    (setq _got_new_plan __got_new_plan)
+   (setq _emergency (round __emergency))
+   (setq _crit_check (string __crit_check))
+   (setq _current_state (round __current_state))
+   (setq _lane (round __lane))
+   (setq _timestep (round __timestep))
+   (setq _request __request)
    self)
   (:header
    (&rest __header)
@@ -76,18 +86,33 @@
   (:old_policy
    (&optional __old_policy)
    (if __old_policy (setq _old_policy __old_policy)) _old_policy)
-  (:timestep
-   (&optional __timestep)
-   (if __timestep (setq _timestep __timestep)) _timestep)
-  (:v_refx
-   (&optional __v_refx)
-   (if __v_refx (setq _v_refx __v_refx)) _v_refx)
+  (:v_emg
+   (&optional __v_emg)
+   (if __v_emg (setq _v_emg __v_emg)) _v_emg)
   (:yaw_ref
    (&optional __yaw_ref)
    (if __yaw_ref (setq _yaw_ref __yaw_ref)) _yaw_ref)
   (:got_new_plan
    (&optional __got_new_plan)
    (if __got_new_plan (setq _got_new_plan __got_new_plan)) _got_new_plan)
+  (:emergency
+   (&optional __emergency)
+   (if __emergency (setq _emergency __emergency)) _emergency)
+  (:crit_check
+   (&optional __crit_check)
+   (if __crit_check (setq _crit_check __crit_check)) _crit_check)
+  (:current_state
+   (&optional __current_state)
+   (if __current_state (setq _current_state __current_state)) _current_state)
+  (:lane
+   (&optional __lane)
+   (if __lane (setq _lane __lane)) _lane)
+  (:timestep
+   (&optional __timestep)
+   (if __timestep (setq _timestep __timestep)) _timestep)
+  (:request
+   (&optional __request)
+   (if __request (setq _request __request)) _request)
   (:serialization-length
    ()
    (+
@@ -107,13 +132,23 @@
     (* 4    (length _policy)) 4
     ;; int32[] _old_policy
     (* 4    (length _old_policy)) 4
-    ;; int32 _timestep
-    4
-    ;; float32 _v_refx
+    ;; float32 _v_emg
     4
     ;; float32 _yaw_ref
     4
     ;; bool _got_new_plan
+    1
+    ;; int32 _emergency
+    4
+    ;; string _crit_check
+    4 (length _crit_check)
+    ;; int32 _current_state
+    4
+    ;; int32 _lane
+    4
+    ;; int32 _timestep
+    4
+    ;; bool _request
     1
     ))
   (:serialize
@@ -145,14 +180,24 @@
      (dotimes (i (length _old_policy))
        (write-long (elt _old_policy i) s)
        )
-     ;; int32 _timestep
-       (write-long _timestep s)
-     ;; float32 _v_refx
-       (sys::poke _v_refx (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _v_emg
+       (sys::poke _v_emg (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32 _yaw_ref
        (sys::poke _yaw_ref (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; bool _got_new_plan
        (if _got_new_plan (write-byte -1 s) (write-byte 0 s))
+     ;; int32 _emergency
+       (write-long _emergency s)
+     ;; string _crit_check
+       (write-long (length _crit_check) s) (princ _crit_check s)
+     ;; int32 _current_state
+       (write-long _current_state s)
+     ;; int32 _lane
+       (write-long _lane s)
+     ;; int32 _timestep
+       (write-long _timestep s)
+     ;; bool _request
+       (if _request (write-byte -1 s) (write-byte 0 s))
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -188,19 +233,29 @@
      (dotimes (i n)
      (setf (elt _old_policy i) (sys::peek buf ptr- :integer)) (incf ptr- 4)
      ))
-   ;; int32 _timestep
-     (setq _timestep (sys::peek buf ptr- :integer)) (incf ptr- 4)
-   ;; float32 _v_refx
-     (setq _v_refx (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _v_emg
+     (setq _v_emg (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32 _yaw_ref
      (setq _yaw_ref (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; bool _got_new_plan
      (setq _got_new_plan (not (= 0 (sys::peek buf ptr- :char)))) (incf ptr- 1)
+   ;; int32 _emergency
+     (setq _emergency (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; string _crit_check
+     (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _crit_check (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
+   ;; int32 _current_state
+     (setq _current_state (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; int32 _lane
+     (setq _lane (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; int32 _timestep
+     (setq _timestep (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; bool _request
+     (setq _request (not (= 0 (sys::peek buf ptr- :char)))) (incf ptr- 1)
    ;;
    self)
   )
 
-(setf (get formal_control::SelfStateMsg :md5sum-) "a8945206644fb2fbf7de854487cab7b2")
+(setf (get formal_control::SelfStateMsg :md5sum-) "e16fb09f7f887b94d9bd0e0a250f07a7")
 (setf (get formal_control::SelfStateMsg :datatype-) "formal_control/SelfStateMsg")
 (setf (get formal_control::SelfStateMsg :definition-)
       "std_msgs/Header header
@@ -213,15 +268,18 @@ float32 v_relative
 int32[] actions
 int32[] policy
 int32[] old_policy
-int32 timestep
 
-float32 v_refx
+float32 v_emg
 float32 yaw_ref
 
 bool got_new_plan
 
-
-
+int32 emergency
+string crit_check
+int32 current_state
+int32 lane
+int32 timestep
+bool request
 
 ================================================================================
 MSG: std_msgs/Header
@@ -245,6 +303,6 @@ string frame_id
 
 
 
-(provide :formal_control/SelfStateMsg "a8945206644fb2fbf7de854487cab7b2")
+(provide :formal_control/SelfStateMsg "e16fb09f7f887b94d9bd0e0a250f07a7")
 
 

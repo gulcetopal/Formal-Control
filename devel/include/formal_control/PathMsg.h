@@ -26,7 +26,7 @@ struct PathMsg_
 
   PathMsg_()
     : header()
-    , m()
+    , m(0.0)
     , y_start()
     , y_finish()
     , x_start()
@@ -35,7 +35,7 @@ struct PathMsg_
     }
   PathMsg_(const ContainerAllocator& _alloc)
     : header(_alloc)
-    , m(_alloc)
+    , m(0.0)
     , y_start(_alloc)
     , y_finish(_alloc)
     , x_start(_alloc)
@@ -49,7 +49,7 @@ struct PathMsg_
    typedef  ::std_msgs::Header_<ContainerAllocator>  _header_type;
   _header_type header;
 
-   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _m_type;
+   typedef float _m_type;
   _m_type m;
 
    typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _y_start_type;
@@ -145,12 +145,12 @@ struct MD5Sum< ::formal_control::PathMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "aea262bd14c4beff32fb4111e598fc59";
+    return "768ebd03b31b8172a50d65a6c3f01ec4";
   }
 
   static const char* value(const ::formal_control::PathMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xaea262bd14c4beffULL;
-  static const uint64_t static_value2 = 0x32fb4111e598fc59ULL;
+  static const uint64_t static_value1 = 0x768ebd03b31b8172ULL;
+  static const uint64_t static_value2 = 0xa50d65a6c3f01ec4ULL;
 };
 
 template<class ContainerAllocator>
@@ -171,7 +171,7 @@ struct Definition< ::formal_control::PathMsg_<ContainerAllocator> >
   {
     return "std_msgs/Header header\n\
 \n\
-float32[] m\n\
+float32 m\n\
 float32[] y_start\n\
 float32[] y_finish\n\
 float32[] x_start\n\
@@ -241,12 +241,8 @@ struct Printer< ::formal_control::PathMsg_<ContainerAllocator> >
     s << indent << "header: ";
     s << std::endl;
     Printer< ::std_msgs::Header_<ContainerAllocator> >::stream(s, indent + "  ", v.header);
-    s << indent << "m[]" << std::endl;
-    for (size_t i = 0; i < v.m.size(); ++i)
-    {
-      s << indent << "  m[" << i << "]: ";
-      Printer<float>::stream(s, indent + "  ", v.m[i]);
-    }
+    s << indent << "m: ";
+    Printer<float>::stream(s, indent + "  ", v.m);
     s << indent << "y_start[]" << std::endl;
     for (size_t i = 0; i < v.y_start.size(); ++i)
     {

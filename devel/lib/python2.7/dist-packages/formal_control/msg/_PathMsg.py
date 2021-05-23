@@ -8,12 +8,12 @@ import struct
 import std_msgs.msg
 
 class PathMsg(genpy.Message):
-  _md5sum = "aea262bd14c4beff32fb4111e598fc59"
+  _md5sum = "768ebd03b31b8172a50d65a6c3f01ec4"
   _type = "formal_control/PathMsg"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """std_msgs/Header header
 
-float32[] m
+float32 m
 float32[] y_start
 float32[] y_finish
 float32[] x_start
@@ -39,7 +39,7 @@ time stamp
 string frame_id
 """
   __slots__ = ['header','m','y_start','y_finish','x_start','x_finish','check']
-  _slot_types = ['std_msgs/Header','float32[]','float32[]','float32[]','float32[]','float32[]','bool']
+  _slot_types = ['std_msgs/Header','float32','float32[]','float32[]','float32[]','float32[]','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -61,7 +61,7 @@ string frame_id
       if self.header is None:
         self.header = std_msgs.msg.Header()
       if self.m is None:
-        self.m = []
+        self.m = 0.
       if self.y_start is None:
         self.y_start = []
       if self.y_finish is None:
@@ -74,7 +74,7 @@ string frame_id
         self.check = False
     else:
       self.header = std_msgs.msg.Header()
-      self.m = []
+      self.m = 0.
       self.y_start = []
       self.y_finish = []
       self.x_start = []
@@ -101,10 +101,7 @@ string frame_id
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      length = len(self.m)
-      buff.write(_struct_I.pack(length))
-      pattern = '<%sf'%length
-      buff.write(struct.pack(pattern, *self.m))
+      buff.write(_get_struct_f().pack(self.m))
       length = len(self.y_start)
       buff.write(_struct_I.pack(length))
       pattern = '<%sf'%length
@@ -149,11 +146,7 @@ string frame_id
         self.header.frame_id = str[start:end]
       start = end
       end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      pattern = '<%sf'%length
-      start = end
-      end += struct.calcsize(pattern)
-      self.m = struct.unpack(pattern, str[start:end])
+      (self.m,) = _get_struct_f().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -206,10 +199,7 @@ string frame_id
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      length = len(self.m)
-      buff.write(_struct_I.pack(length))
-      pattern = '<%sf'%length
-      buff.write(self.m.tostring())
+      buff.write(_get_struct_f().pack(self.m))
       length = len(self.y_start)
       buff.write(_struct_I.pack(length))
       pattern = '<%sf'%length
@@ -255,11 +245,7 @@ string frame_id
         self.header.frame_id = str[start:end]
       start = end
       end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      pattern = '<%sf'%length
-      start = end
-      end += struct.calcsize(pattern)
-      self.m = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      (self.m,) = _get_struct_f().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -312,3 +298,9 @@ def _get_struct_B():
     if _struct_B is None:
         _struct_B = struct.Struct("<B")
     return _struct_B
+_struct_f = None
+def _get_struct_f():
+    global _struct_f
+    if _struct_f is None:
+        _struct_f = struct.Struct("<f")
+    return _struct_f

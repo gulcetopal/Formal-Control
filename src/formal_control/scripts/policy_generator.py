@@ -30,11 +30,18 @@ class PolicyGenerator():
                     self.actions.append(3)
                 elif line[0] == '[so]':
                     self.actions.append(4)
+                elif line[0] == '[em1]':
+                    self.actions.append(5)
+                elif line[0] == '[em2]':
+                    self.actions.append(6)
+                elif line[0] == '[em3]':
+                    self.actions.append(7)
 
-        print(self.policy)
+
 
     def main(self):
         self.Parser()
+
 
 if __name__ == '__main__':
     PolicyGenerator()
